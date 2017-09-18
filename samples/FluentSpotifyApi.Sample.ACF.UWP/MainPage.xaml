@@ -1,0 +1,103 @@
+﻿<Page
+    x:Class="FluentSpotifyApi.Sample.ACF.UWP.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:FluentSpotifyApi.Sample.ACF.UWP"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:i="using:Microsoft.Xaml.Interactivity"
+    xmlns:core="using:Microsoft.Xaml.Interactions.Core"   
+    xmlns:viewModels="using:FluentSpotifyApi.Sample.ACF.UWP.ViewModels"  
+    NavigationCacheMode="Required"
+    DataContext="{Binding Source={StaticResource ViewModelLocator}, Path=Main}"
+    mc:Ignorable="d">
+    <i:Interaction.Behaviors>
+        <core:EventTriggerBehavior EventName="Loaded">
+            <core:InvokeCommandAction Command="{Binding LoadCommand}" />
+        </core:EventTriggerBehavior>
+    </i:Interaction.Behaviors>
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <ProgressRing Visibility="{Binding IsLoading, Converter={StaticResource BoolToVisibilityConverter}}" IsActive="True" />
+        <Grid Visibility="{Binding IsLoading, Converter={StaticResource InvertedBoolToVisibilityConverter}}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid Grid.Row="0" Background="LightGray">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" Command="{Binding LoadPlaylistsCommand}">Playlists</Button>
+                <StackPanel Grid.Column="1" HorizontalAlignment="Right" Orientation="Horizontal">
+                    <ProgressRing Visibility="{Binding LoginViewModel.IsLoggingInOrLoggingOut, Converter={StaticResource BoolToVisibilityConverter}}" IsActive="True" />
+                    <Grid Margin="6,0,0,0">
+                        <StackPanel Visibility="{Binding LoginViewModel.IsLoggedIn, Converter={StaticResource BoolToVisibilityConverter}}" Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center" Text="{Binding LoginViewModel.User.DisplayName}" Style="{StaticResource BodyTextBlockStyle}"/>
+                            <Button Margin="6,0,0,0" Command="{Binding LoginViewModel.LogoutCommand}">Log Out</Button>
+                        </StackPanel>
+                        <Button Visibility="{Binding LoginViewModel.IsLoggedIn, Converter={StaticResource InvertedBoolToVisibilityConverter}}" Command="{Binding LoginViewModel.LoginCommand}">Log In with Spotify</Button>
+                    </Grid>
+                </StackPanel>
+            </Grid>
+            <Grid Grid.Row="1" Padding="6" Background="LightSalmon" Visibility="{Binding LoginViewModel.IsLoginServiceError, Converter={StaticResource BoolToVisibilityConverter}}">
+                <TextBlock Text="A communication error has occurred while logging in with Spotify." HorizontalAlignment="Left" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}" />
+            </Grid>
+            <Grid Grid.Row="2" Padding="6" Background="LightSalmon" Visibility="{Binding IsLoadPlaylistsServiceError, Converter={StaticResource BoolToVisibilityConverter}}">
+                <TextBlock Text="A communication error has occurred while loading playlists." HorizontalAlignment="Left" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}" />
+            </Grid>
+            <Grid Grid.Row="3" Padding="6" Background="LightSalmon" Visibility="{Binding IsLoadPlaylistsCanceled, Converter={StaticResource BoolToVisibilityConverter}}">
+                <TextBlock Text="The loading of playlists has been canceled." HorizontalAlignment="Left" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}" />
+            </Grid>
+            <Grid Grid.Row="4" Padding="6" Background="LightSalmon" Visibility="{Binding IsAccessRevoked, Converter={StaticResource BoolToVisibilityConverter}}">
+                <TextBlock Text="The access to the Spotify account has been revoked. Please logout and login again." HorizontalAlignment="Left" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}" />
+            </Grid>
+            <Grid Grid.Row="5">
+                <ProgressRing Visibility="{Binding CancelableActionViewModel.IsExecuting, Converter={StaticResource BoolToVisibilityConverter}}" IsActive="True" />
+                <ListView ItemsSource="{Binding Playlists}" Visibility="{Binding CancelableActionViewModel.IsExecuting, Converter={StaticResource InvertedBoolToVisibilityConverter}}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="viewModels:PlaylistViewModel">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                    <RowDefinition />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Row="0" Grid.Column="0" Text="Name:" Style="{StaticResource BodyTextBlockStyle}" FontWeight="SemiBold" Margin="3" />
+                                <TextBlock Grid.Row="0" Grid.Column="1" Text="{x:Bind Name}" Style="{StaticResource BodyTextBlockStyle}" Margin="3" />
+                                <TextBlock Grid.Row="1" Grid.Column="0" Text="Owner:" Style="{StaticResource BodyTextBlockStyle}" FontWeight="SemiBold" Margin="3" />
+                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{x:Bind Owner}" Style="{StaticResource BodyTextBlockStyle}" Margin="3" />
+                                <TextBlock Grid.Row="2" Grid.Column="0" Text="No. of tracks:" Style="{StaticResource BodyTextBlockStyle}" FontWeight="SemiBold" Margin="3" />
+                                <TextBlock Grid.Row="2" Grid.Column="1" Text="{x:Bind NumberOfTracks}" Style="{StaticResource BodyTextBlockStyle}" Margin="3" />
+                                <TextBlock Grid.Row="3" Grid.Column="0" Text="Is public:" Style="{StaticResource BodyTextBlockStyle}" FontWeight="SemiBold" Margin="3" />
+                                <TextBlock Grid.Row="3" Grid.Column="1" FontFamily="Segoe MDL2 Assets" Text="{x:Bind IsPublic, Converter={StaticResource NullableBoolToGlyphConverter}}" Margin="3" VerticalAlignment="Bottom" />
+                                <TextBlock Grid.Row="4" Grid.Column="0" Text="Is collaborative:" Style="{StaticResource BodyTextBlockStyle}" FontWeight="SemiBold" Margin="3" />
+                                <TextBlock Grid.Row="4" Grid.Column="1" FontFamily="Segoe MDL2 Assets" Text="{x:Bind IsCollaborative, Converter={StaticResource NullableBoolToGlyphConverter}}" Margin="3" VerticalAlignment="Bottom"  />
+                                <TextBlock Grid.Row="5" Grid.Column="0" Text="Is owned:" Style="{StaticResource BodyTextBlockStyle}" FontWeight="SemiBold" Margin="3" />
+                                <TextBlock Grid.Row="5" Grid.Column="1" FontFamily="Segoe MDL2 Assets" Text="{x:Bind IsOwned, Converter={StaticResource NullableBoolToGlyphConverter}}" Margin="3" VerticalAlignment="Bottom"  />                                
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+                            <Setter Property="Padding" Value="9" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                </ListView>
+            </Grid>
+        </Grid>
+    </Grid>
+</Page>

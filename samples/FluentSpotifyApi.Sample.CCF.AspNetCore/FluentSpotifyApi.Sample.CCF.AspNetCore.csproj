@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <UserSecretsId>6e478995-3e50-4cbc-8209-d0b400810763</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\FluentSpotifyApi.AuthorizationFlows.AspNetCore\FluentSpotifyApi.AuthorizationFlows.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\src\FluentSpotifyApi.Core\FluentSpotifyApi.Core.csproj" />
+    <ProjectReference Include="..\..\src\FluentSpotifyApi\FluentSpotifyApi.csproj" />
+  </ItemGroup>
+
+</Project>

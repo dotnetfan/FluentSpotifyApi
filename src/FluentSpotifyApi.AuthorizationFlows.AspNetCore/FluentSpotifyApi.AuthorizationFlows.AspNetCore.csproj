@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <IncludeSymbols>True</IncludeSymbols>
+    <Description>Implementation of Spotify authorization flows for ASP.NET Core apps.</Description>
+    <Authors>Patrik Gebrian</Authors>
+    <Company>Patrik Gebrian</Company>
+    <PackageLicenseUrl>https://github.com/dotnetfan/FluentSpotifyApi/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/dotnetfan/FluentSpotifyApi</PackageProjectUrl>
+    <PackageTags>spotify, api, OAuth, AspNetCore</PackageTags>
+    <Product>FluentSpotifyApi.AuthorizationFlows.AspNetCore</Product>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>    
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\Debug\netstandard2.0\FluentSpotifyApi.AuthorizationFlows.AspNetCore.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>bin\Release\netstandard2.0\FluentSpotifyApi.AuthorizationFlows.AspNetCore.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OAuth" Version="2.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FluentSpotifyApi.AuthorizationFlows\FluentSpotifyApi.AuthorizationFlows.csproj" />
+  </ItemGroup>
+
+</Project>

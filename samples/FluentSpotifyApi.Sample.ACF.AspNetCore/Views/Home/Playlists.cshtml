@@ -1,0 +1,49 @@
+﻿@model IEnumerable<FluentSpotifyApi.Sample.ACF.AspNetCore.Models.PlaylistListItemModel>
+
+<table class="table table-striped">
+    <tr>
+        <th>
+            @Html.DisplayNameFor(model => model.Name)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.Owner)
+        </th>
+        <th class="text-right">
+            @Html.DisplayNameFor(model => model.NumberOfTracks)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.IsPublic)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.IsCollaborative)
+        </th>
+        <th>
+            @Html.DisplayNameFor(model => model.IsOwned)
+        </th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Owner)
+            </td>
+            <td class="text-right">
+                @Html.DisplayFor(modelItem => item.NumberOfTracks)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsPublic)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsCollaborative)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsOwned)
+            </td>
+        </tr>
+    }
+
+</table>
