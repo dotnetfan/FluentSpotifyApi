@@ -113,7 +113,6 @@
     <Compile Include="Core\Client\Authorization\CsrfTokenProvider.cs" />
     <Compile Include="Extensions\DispatcherExtensions.cs" />
     <Compile Include="AuthorizationCode\UwpAuthorizationCodeFlowPipelineItem.cs" />
-    <Compile Include="Exceptions\AuthorizationErrorReason.cs" />
     <Compile Include="Exceptions\SpotifyUwpAuthorizationException.cs" />
     <Compile Include="Core\Client\Authorization\AuthorizationCallbackUriProvider.cs" />
     <Compile Include="Core\Client\Authorization\AuthenticationBroker.cs" />
