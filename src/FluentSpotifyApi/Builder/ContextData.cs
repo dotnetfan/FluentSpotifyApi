@@ -12,8 +12,8 @@ namespace FluentSpotifyApi.Builder
             this.FluentSpotifyClientOptionsProvider = fluentSpotifyClientOptionsProvider;
         }
 
-        public ISpotifyHttpClient SpotifyHttpClient { get; private set; }
+        public ISpotifyHttpClient SpotifyHttpClient { get; }
 
-        public IOptionsProvider<FluentSpotifyClientOptions> FluentSpotifyClientOptionsProvider { get; private set; }
+        public IOptionsProvider<FluentSpotifyClientOptions> FluentSpotifyClientOptionsProvider { get; }
     }
 }

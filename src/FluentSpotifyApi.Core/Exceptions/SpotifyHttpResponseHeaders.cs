@@ -23,6 +23,6 @@ namespace FluentSpotifyApi.Core.Exceptions
         /// <value>
         /// The retry after.
         /// </value>
-        public TimeSpan? RetryAfter { get; private set; }
+        public TimeSpan? RetryAfter { get; }
     }
 }

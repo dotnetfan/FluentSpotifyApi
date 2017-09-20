@@ -23,6 +23,6 @@ namespace FluentSpotifyApi.AuthorizationFlows.UWP.Exceptions
         /// <value>
         /// The reason.
         /// </value>
-        public WebAuthenticationStatus Reason { get; private set; }
+        public WebAuthenticationStatus Reason { get; }
     }
 }

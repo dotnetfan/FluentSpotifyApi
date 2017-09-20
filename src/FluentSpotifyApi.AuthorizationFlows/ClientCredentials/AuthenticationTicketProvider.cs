@@ -94,7 +94,7 @@ namespace FluentSpotifyApi.AuthorizationFlows.ClientCredentials
 
             public IUser User => null;
 
-            public AccessToken AccessToken { get; private set; }
+            public AccessToken AccessToken { get; }
         }
     }
 }

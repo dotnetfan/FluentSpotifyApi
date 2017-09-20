@@ -24,7 +24,7 @@ namespace FluentSpotifyApi.AuthorizationFlows.Core.Model
         /// <value>
         /// The token.
         /// </value>
-        public string Token { get; private set; }
+        public string Token { get; }
 
         /// <summary>
         /// Gets the expires at.
@@ -32,6 +32,6 @@ namespace FluentSpotifyApi.AuthorizationFlows.Core.Model
         /// <value>
         /// The expires at.
         /// </value>
-        public DateTimeOffset ExpiresAt { get; private set; }
+        public DateTimeOffset ExpiresAt { get; }
     }
 }

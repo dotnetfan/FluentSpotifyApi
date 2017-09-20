@@ -26,7 +26,7 @@ namespace FluentSpotifyApi.Core.Exceptions
         /// <value>
         /// The status code.
         /// </value>
-        public HttpStatusCode ErrorCode { get; private set; }
+        public HttpStatusCode ErrorCode { get; }
 
         /// <summary>
         /// Gets the headers.
@@ -34,6 +34,6 @@ namespace FluentSpotifyApi.Core.Exceptions
         /// <value>
         /// The headers.
         /// </value>
-        public SpotifyHttpResponseHeaders Headers { get; private set; }
+        public SpotifyHttpResponseHeaders Headers { get; }
     }
 }

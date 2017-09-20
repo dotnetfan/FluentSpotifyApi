@@ -33,10 +33,10 @@ namespace FluentSpotifyApi.Builder.User.Playlists.Tracks
             }
 
             [JsonProperty(PropertyName = "range_start")]
-            public int RangeStart { get; private set; }
+            public int RangeStart { get; }
 
             [JsonProperty(PropertyName = "insert_before")]
-            public int InsertBefore { get; private set; }
+            public int InsertBefore { get; }
 
             [JsonProperty(PropertyName = "range_length", NullValueHandling = NullValueHandling.Ignore)]
             public int? RangeLength { get; set; }

@@ -44,9 +44,9 @@ namespace FluentSpotifyApi.Sample.ACF.UWP.ViewModels
             this.LoginViewModel.PropertyChanged += this.LoginViewModel_PropertyChanged;
         }
 
-        public LoginViewModel LoginViewModel { get; private set; }
+        public LoginViewModel LoginViewModel { get; }
 
-        public CancelableActionViewModel CancelableActionViewModel { get; private set; }
+        public CancelableActionViewModel CancelableActionViewModel { get; }
 
         public bool IsLoading
         {

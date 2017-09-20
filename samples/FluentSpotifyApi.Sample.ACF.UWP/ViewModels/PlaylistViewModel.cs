@@ -24,6 +24,6 @@ namespace FluentSpotifyApi.Sample.ACF.UWP.ViewModels
 
         public bool? IsCollaborative => this.playlist.Collaborative;
 
-        public bool IsOwned { get; private set; }
+        public bool IsOwned { get; }
     }
 }

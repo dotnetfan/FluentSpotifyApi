@@ -28,12 +28,12 @@ namespace FluentSpotifyApi.Core.Internal
         /// <value>
         /// The value.
         /// </value>
-        public T Value { get; private set; }
+        public T Value { get; }
 
         /// <summary>
         /// Determines whether the wrapped value will be disposed.
         /// </summary>
-        public bool IsOwned { get; private set; }
+        public bool IsOwned { get; }
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.

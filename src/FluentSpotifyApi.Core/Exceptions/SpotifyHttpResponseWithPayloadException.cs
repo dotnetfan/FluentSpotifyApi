@@ -28,6 +28,6 @@ namespace FluentSpotifyApi.Core.Exceptions
         /// <value>
         /// The payload.
         /// </value>
-        public TPayload Payload { get; private set; }
+        public TPayload Payload { get; }
     }
 }

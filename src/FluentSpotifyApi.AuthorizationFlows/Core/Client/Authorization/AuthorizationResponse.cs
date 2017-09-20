@@ -23,7 +23,7 @@
         /// <value>
         /// The payload.
         /// </value>
-        public TPayload Payload { get; private set; }
+        public TPayload Payload { get; }
 
         /// <summary>
         /// Gets the CSRF token.
@@ -31,6 +31,6 @@
         /// <value>
         /// The CSRF token.
         /// </value>
-        public string CsrfToken { get; private set; }
+        public string CsrfToken { get; }
     }
 }

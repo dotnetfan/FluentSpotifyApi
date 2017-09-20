@@ -25,17 +25,17 @@ namespace FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Native
         /// <summary>
         /// Gets the authorization key that is used for getting access tokens from the token proxy service.
         /// </summary>
-        public string AuthorizationKey { get; private set; }
+        public string AuthorizationKey { get; }
 
         /// <summary>
         /// Gets the access token.
         /// </summary>
-        public AccessToken AccessToken { get; private set; }
+        public AccessToken AccessToken { get; }
 
         /// <summary>
         /// Gets the user.
         /// </summary>
-        public PrivateUser User { get; private set; }
+        public PrivateUser User { get; }
 
         /// <summary>
         /// Gets the user.

@@ -113,11 +113,11 @@ namespace FluentSpotifyApi.AuthorizationFlows.AspNetCore.AuthorizationCode
                 this.User = new PrincipalUser(authenticateResult.Principal);
             }
 
-            public string RefreshToken { get; private set; }
+            public string RefreshToken { get; }
 
-            public IUser User { get; private set; }
+            public IUser User { get; }
 
-            public AccessToken AccessToken { get; private set; }
+            public AccessToken AccessToken { get; }
 
             private class PrincipalUser : IUser
             {
@@ -133,7 +133,7 @@ namespace FluentSpotifyApi.AuthorizationFlows.AspNetCore.AuthorizationCode
                     this.Id = userId;
                 }
 
-                public string Id { get; private set; }
+                public string Id { get; }
             }
         }
     }

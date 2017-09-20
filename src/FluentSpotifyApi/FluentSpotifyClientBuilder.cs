@@ -107,7 +107,7 @@ namespace FluentSpotifyApi
                 this.Items = new List<IPipelineItem>();
             }
 
-            public IList<IPipelineItem> Items { get; private set; }
+            public IList<IPipelineItem> Items { get; }
 
             public IPipeline Add(IPipelineItem item)
             {
