@@ -20,26 +20,20 @@ namespace FluentSpotifyApi.Builder.User.Playlists.Tracks
         public Task<PlaylistSnapshot> ReorderAsync(int rangeStart, int insertBefore, int rangeLength, string snapshotId, CancellationToken cancellationToken)
         {
             return this.PutAsync<PlaylistSnapshot, ReoderParameters>(
-                new ReoderParameters(rangeStart, insertBefore) { RangeLength = rangeLength, SnapshotId = snapshotId }, 
+                new ReoderParameters { RangeStart = rangeStart, InsertBefore = insertBefore, RangeLength = rangeLength, SnapshotId = snapshotId }, 
                 cancellationToken);
         }
 
         private class ReoderParameters
         {
-            public ReoderParameters(int rangeStart, int insertBefore)
-            {
-                this.RangeStart = rangeStart;
-                this.InsertBefore = insertBefore;
-            }
-
             [JsonProperty(PropertyName = "range_start")]
-            public int RangeStart { get; }
+            public int RangeStart { get; set; }
 
             [JsonProperty(PropertyName = "insert_before")]
-            public int InsertBefore { get; }
+            public int InsertBefore { get; set; }
 
-            [JsonProperty(PropertyName = "range_length", NullValueHandling = NullValueHandling.Ignore)]
-            public int? RangeLength { get; set; }
+            [JsonProperty(PropertyName = "range_length")]
+            public int RangeLength { get; set; }
 
             [JsonProperty(PropertyName = "snapshot_id", NullValueHandling = NullValueHandling.Ignore)]
             public string SnapshotId { get; set; }
