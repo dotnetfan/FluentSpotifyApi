@@ -43,8 +43,6 @@ namespace FluentSpotifyApi.Builder
                 cancellationToken, 
                 queryStringParameters, 
                 optionalQueryStringParameters, 
-                null, 
-                null, 
                 requestHeaders, 
                 additionalRouteValues);
         }
@@ -71,8 +69,6 @@ namespace FluentSpotifyApi.Builder
             CancellationToken cancellationToken, 
             object queryStringParameters = null, 
             object optionalQueryStringParameters = null, 
-            object requestBodyParameters = null, 
-            object optionalRequestBodyParameters = null, 
             IEnumerable<KeyValuePair<string, string>> requestHeaders = null, 
             params object[] additionalRouteValues)
         {
@@ -81,8 +77,6 @@ namespace FluentSpotifyApi.Builder
                 cancellationToken, 
                 queryStringParameters, 
                 optionalQueryStringParameters, 
-                requestBodyParameters, 
-                optionalRequestBodyParameters, 
                 requestHeaders, 
                 additionalRouteValues);
         }
@@ -109,8 +103,6 @@ namespace FluentSpotifyApi.Builder
             CancellationToken cancellationToken, 
             object queryStringParameters = null, 
             object optionalQueryStringParameters = null, 
-            object requestBodyParameters = null, 
-            object optionalRequestBodyParameters = null, 
             IEnumerable<KeyValuePair<string, string>> requestHeaders = null, 
             params object[] additionalRouteValues)
         {
@@ -119,8 +111,6 @@ namespace FluentSpotifyApi.Builder
                 cancellationToken, 
                 queryStringParameters, 
                 optionalQueryStringParameters, 
-                requestBodyParameters, 
-                optionalRequestBodyParameters, 
                 requestHeaders, 
                 additionalRouteValues);
         }
@@ -148,8 +138,6 @@ namespace FluentSpotifyApi.Builder
             CancellationToken cancellationToken, 
             object queryStringParameters = null, 
             object optionalQueryStringParameters = null,
-            object requestBodyParameters = null,
-            object optionalRequestBodyParameters = null,
             IEnumerable<KeyValuePair<string, string>> requestHeaders = null, 
             params object[] additionalRouteValues)
         {
@@ -157,7 +145,7 @@ namespace FluentSpotifyApi.Builder
                 this.ContextData.FluentSpotifyClientOptionsProvider.Get().WebApiEndpoint,
                 httpMethod,
                 CombineParameters(queryStringParameters, optionalQueryStringParameters),
-                CombineParameters(requestBodyParameters, optionalRequestBodyParameters), 
+                null, 
                 requestHeaders,
                 cancellationToken,
                 this.CombineRouteValues(additionalRouteValues));
