@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -47,92 +49,6 @@ namespace FluentSpotifyApi.Builder
                 additionalRouteValues);
         }
 
-        protected Task<TResult> PostAsync<TResult, TRequestBody>(
-            TRequestBody requestBody, 
-            CancellationToken cancellationToken, 
-            object queryStringParameters = null, 
-            object optionalQueryStringParameters = null, 
-            IEnumerable<KeyValuePair<string, string>> requestHeaders = null, 
-            params object[] additionalRouteValues)
-        {
-            return this.SendAsync<TResult, TRequestBody>(
-                HttpMethod.Post, 
-                requestBody, 
-                cancellationToken, 
-                queryStringParameters, 
-                optionalQueryStringParameters, 
-                requestHeaders, 
-                additionalRouteValues);
-        }
-
-        protected Task<T> PutAsync<T>(
-            CancellationToken cancellationToken, 
-            object queryStringParameters = null, 
-            object optionalQueryStringParameters = null, 
-            IEnumerable<KeyValuePair<string, string>> requestHeaders = null, 
-            params object[] additionalRouteValues)
-        {
-            return this.SendAsync<T>(
-                HttpMethod.Put, 
-                cancellationToken, 
-                queryStringParameters, 
-                optionalQueryStringParameters, 
-                requestHeaders, 
-                additionalRouteValues);
-        }
-
-        protected Task<TResult> PutAsync<TResult, TRequestBody>(
-            TRequestBody requestBody, 
-            CancellationToken cancellationToken, 
-            object queryStringParameters = null, 
-            object optionalQueryStringParameters = null, 
-            IEnumerable<KeyValuePair<string, string>> requestHeaders = null, 
-            params object[] additionalRouteValues)
-        {
-            return this.SendAsync<TResult, TRequestBody>(
-                HttpMethod.Put, 
-                requestBody, 
-                cancellationToken,
-                queryStringParameters, 
-                optionalQueryStringParameters, 
-                requestHeaders, 
-                additionalRouteValues);
-        }
-
-        protected Task<T> DeleteAsync<T>(
-            CancellationToken cancellationToken, 
-            object queryStringParameters = null, 
-            object optionalQueryStringParameters = null, 
-            IEnumerable<KeyValuePair<string, string>> requestHeaders = null, 
-            params object[] additionalRouteValues)
-        {
-            return this.SendAsync<T>(
-                HttpMethod.Delete, 
-                cancellationToken, 
-                queryStringParameters, 
-                optionalQueryStringParameters, 
-                requestHeaders, 
-                additionalRouteValues);
-        }
-
-        protected Task<TResult> DeleteAsync<TResult, TRequestBody>(
-            TRequestBody requestBody, 
-            CancellationToken cancellationToken, 
-            object queryStringParameters = null, 
-            object optionalQueryStringParameters = null, 
-            IEnumerable<KeyValuePair<string, string>> requestHeaders = null, 
-            params object[] additionalRouteValues)
-        {
-            return this.SendAsync<TResult, TRequestBody>(
-                HttpMethod.Delete, 
-                requestBody,
-                cancellationToken, 
-                queryStringParameters, 
-                optionalQueryStringParameters, 
-                requestHeaders, 
-                additionalRouteValues);
-        }
-
         protected Task<T> SendAsync<T>(
             HttpMethod httpMethod, 
             CancellationToken cancellationToken, 
@@ -165,6 +81,27 @@ namespace FluentSpotifyApi.Builder
                 httpMethod,                 
                 CombineParameters(queryStringParameters, optionalQueryStringParameters),
                 requestBody,
+                requestHeaders,
+                cancellationToken,
+                this.CombineRouteValues(additionalRouteValues));
+        }
+
+        protected Task<T> SendAsync<T>(
+            HttpMethod httpMethod,
+            Func<CancellationToken, Task<Stream>> streamProvider,
+            string streamContentType,
+            CancellationToken cancellationToken,
+            object queryStringParameters = null,
+            object optionalQueryStringParameters = null,
+            IEnumerable<KeyValuePair<string, string>> requestHeaders = null,
+            params object[] additionalRouteValues)
+        {
+            return this.ContextData.SpotifyHttpClient.SendWithStreamBodyAsync<T>(
+                this.ContextData.FluentSpotifyClientOptionsProvider.Get().WebApiEndpoint,
+                httpMethod,
+                CombineParameters(queryStringParameters, optionalQueryStringParameters),
+                streamProvider,
+                streamContentType,
                 requestHeaders,
                 cancellationToken,
                 this.CombineRouteValues(additionalRouteValues));

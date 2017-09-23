@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentSpotifyApi.Builder.User.Playlists.Tracks;
@@ -20,7 +23,12 @@ namespace FluentSpotifyApi.Builder.User.Playlists
 
         public Task UpdateAsync(UpdatePlaylistDto updatePlaylistDto, CancellationToken cancellationToken)
         {
-            return this.PutAsync<object, UpdatePlaylistDto>(updatePlaylistDto, cancellationToken);
+            return this.SendAsync<object, UpdatePlaylistDto>(HttpMethod.Put, updatePlaylistDto, cancellationToken);
+        }
+
+        public Task UpdateCoverAsync(Func<CancellationToken, Task<Stream>> coverStreamProvider, CancellationToken cancellationToken)
+        {
+            return this.SendAsync<object>(HttpMethod.Put, coverStreamProvider, "image/jpeg", cancellationToken, additionalRouteValues: new object[] { "images" });
         }
 
         public IPlaylistTracksBuilder Tracks()

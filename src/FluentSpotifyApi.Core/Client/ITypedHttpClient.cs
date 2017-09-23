@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -50,6 +51,29 @@ namespace FluentSpotifyApi.Core.Client
             HttpMethod httpMethod, 
             object queryStringParameters,
             TRequestBody requestBody,
+            IEnumerable<KeyValuePair<string, string>> requestHeaders,
+            CancellationToken cancellationToken,
+            params object[] routeValues);
+
+        /// <summary>
+        /// Sends request to the server and deserializes response to an instance of <typeparamref name="T" /> using JSON serializer.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="uri">The URI.</param>
+        /// <param name="httpMethod">The HTTP method.</param>
+        /// <param name="queryStringParameters">The query string parameters.</param>
+        /// <param name="streamProvider">The stream provider.</param>
+        /// <param name="streamContentType">The stream content type.</param>
+        /// <param name="requestHeaders">The request headers.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <param name="routeValues">The route values.</param>
+        /// <returns></returns>
+        Task<T> SendWithStreamBodyAsync<T>(
+            Uri uri,
+            HttpMethod httpMethod,
+            object queryStringParameters,
+            Func<CancellationToken, Task<Stream>> streamProvider,
+            string streamContentType,
             IEnumerable<KeyValuePair<string, string>> requestHeaders,
             CancellationToken cancellationToken,
             params object[] routeValues);

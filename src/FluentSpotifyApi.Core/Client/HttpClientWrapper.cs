@@ -35,13 +35,19 @@ namespace FluentSpotifyApi.Core.Client
         {
             var uri = httpRequest.UriFromValuesBuilder.Build();
 
+            HttpContent content = null;
+            if (httpRequest.RequestContentProvider != null)
+            {
+                content = await httpRequest.RequestContentProvider(cancellationToken).ConfigureAwait(false);
+            }
+
             try
             {
                 using (var request = new HttpRequestMessage())
                 {
                     request.RequestUri = uri;
                     request.Method = httpRequest.HttpMethod;
-                    request.Content = httpRequest.RequestContentProvider?.Invoke();
+                    request.Content = content;
 
                     foreach (var item in httpRequest.RequestHeaders.EmptyIfNull())
                     {
@@ -55,7 +61,7 @@ namespace FluentSpotifyApi.Core.Client
                         await response.EnsureSuccessStatusCodeAsync().ConfigureAwait(false);
                         if (response.Content != null)
                         {
-                            result = await httpRequest.ResponseProcessor(response.Content).ConfigureAwait(false);
+                            result = await httpRequest.ResponseProcessor(response.Content, cancellationToken).ConfigureAwait(false);
                         }
 
                         return result;

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -18,7 +19,8 @@ namespace FluentSpotifyApi.Builder.Me.Following
 
         public Task FollowAsync(CancellationToken cancellationToken)
         {
-            return this.PutAsync<object, IdsWrapper>(
+            return this.SendAsync<object, IdsWrapper>(
+                HttpMethod.Put,
                 new IdsWrapper { Ids = this.Sequence.ToList() },
                 cancellationToken,
                 queryStringParameters: new { type = this.entityName });
@@ -26,7 +28,8 @@ namespace FluentSpotifyApi.Builder.Me.Following
 
         public Task UnfollowAsync(CancellationToken cancellationToken)
         {
-            return this.DeleteAsync<object, IdsWrapper>(
+            return this.SendAsync<object, IdsWrapper>(
+                HttpMethod.Delete,
                 new IdsWrapper { Ids = this.Sequence.ToList() },
                 cancellationToken,
                 queryStringParameters: new { type = this.entityName });

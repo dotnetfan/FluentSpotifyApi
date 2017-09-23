@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -95,30 +96,6 @@ namespace FluentSpotifyApi.UnitTests
             var mockResults = new List<MockResult<T>>();
 
             this.SpotifyHttpClientMock
-                .Setup(x => x.SendWithJsonBodyAsync<T, object>(
-                    It.IsAny<Uri>(),
-                    httpMethod,
-                    It.IsAny<object>(),                   
-                    It.IsAny<object>(),
-                    It.IsAny<IEnumerable<KeyValuePair<string, string>>>(),
-                    It.IsAny<CancellationToken>(),
-                    It.IsAny<object[]>()))
-                .Returns((Func<Uri, HttpMethod, object, object, IEnumerable<KeyValuePair<string, string>>, CancellationToken, object[], Task<T>>)((uri, innerHttpMehod, queryParameters, requestBody, requestHeaders, cancellationToken, routeValues) =>
-                {
-                    var result = factory == null ? (T)Activator.CreateInstance(typeof(T)) : factory(i++);
-
-                    mockResults.Add(new MockResult<T>()
-                    {
-                        QueryParameters = ProcessQueryStringParameters(SpotifyObjectHelpers.GetPropertyBag(queryParameters)).Select(item => (item.Key, item.Value)).ToList(),
-                        RouteValues = ProcessRouteValues(routeValues),
-                        RequestPayload = JObject.Parse(JsonConvert.SerializeObject(requestBody)),
-                        Result = result
-                    });
-
-                    return Task.FromResult(result);
-                }));
-
-            this.SpotifyHttpClientMock
                 .Setup(x => x.SendAsync<T>(
                     It.IsAny<Uri>(),
                     httpMethod,                    
@@ -140,6 +117,54 @@ namespace FluentSpotifyApi.UnitTests
                     });
 
                     return Task.FromResult<T>(result);
+                }));
+
+            this.SpotifyHttpClientMock
+                .Setup(x => x.SendWithJsonBodyAsync<T, object>(
+                    It.IsAny<Uri>(),
+                    httpMethod,
+                    It.IsAny<object>(),
+                    It.IsAny<object>(),
+                    It.IsAny<IEnumerable<KeyValuePair<string, string>>>(),
+                    It.IsAny<CancellationToken>(),
+                    It.IsAny<object[]>()))
+                .Returns((Func<Uri, HttpMethod, object, object, IEnumerable<KeyValuePair<string, string>>, CancellationToken, object[], Task<T>>)((uri, innerHttpMehod, queryParameters, requestBody, requestHeaders, cancellationToken, routeValues) =>
+                {
+                    var result = factory == null ? (T)Activator.CreateInstance(typeof(T)) : factory(i++);
+
+                    mockResults.Add(new MockResult<T>()
+                    {
+                        QueryParameters = ProcessQueryStringParameters(SpotifyObjectHelpers.GetPropertyBag(queryParameters)).Select(item => (item.Key, item.Value)).ToList(),
+                        RouteValues = ProcessRouteValues(routeValues),
+                        RequestPayload = JObject.Parse(JsonConvert.SerializeObject(requestBody)),
+                        Result = result
+                    });
+
+                    return Task.FromResult(result);
+                }));
+
+            this.SpotifyHttpClientMock
+                .Setup(x => x.SendWithStreamBodyAsync<T>(
+                    It.IsAny<Uri>(),
+                    httpMethod,
+                    It.IsAny<object>(),
+                    It.IsAny<Func<CancellationToken, Task<Stream>>>(),
+                    It.IsAny<string>(),
+                    It.IsAny<IEnumerable<KeyValuePair<string, string>>>(),
+                    It.IsAny<CancellationToken>(),
+                    It.IsAny<object[]>()))
+                .Returns((Func<Uri, HttpMethod, object, Func<CancellationToken, Task<Stream>>, string, IEnumerable<KeyValuePair<string, string>>, CancellationToken, object[], Task<T>>)((uri, innerHttpMehod, queryParameters, streamProvider, streamContentType, requestHeaders, cancellationToken, routeValues) =>
+                {
+                    var result = factory == null ? (T)Activator.CreateInstance(typeof(T)) : factory(i++);
+
+                    mockResults.Add(new MockResult<T>()
+                    {
+                        QueryParameters = ProcessQueryStringParameters(SpotifyObjectHelpers.GetPropertyBag(queryParameters)).Select(item => (item.Key, item.Value)).ToList(),
+                        RouteValues = ProcessRouteValues(routeValues),
+                        Result = result
+                    });
+
+                    return Task.FromResult(result);
                 }));
 
             return mockResults;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -54,7 +55,7 @@ namespace FluentSpotifyApi.Core.Client
                 uri, 
                 httpMethod, 
                 queryStringParameters, 
-                () => CreateHttpFormUrlEncodedContent(requestBodyParameters), 
+                innerCt => Task.FromResult(CreateHttpFormUrlEncodedContent(requestBodyParameters)), 
                 requestHeaders,
                 cancellationToken,
                 routeValues);
@@ -68,8 +69,8 @@ namespace FluentSpotifyApi.Core.Client
         /// <param name="uri">The URI.</param>
         /// <param name="httpMethod">The HTTP method.</param>
         /// <param name="queryStringParameters">The query string parameters.</param>
-        /// <param name="requestHeaders">The request headers.</param>
         /// <param name="requestBody">The JSON serializable request body.</param> 
+        /// <param name="requestHeaders">The request headers.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <param name="routeValues">The route values.</param>
         /// <returns></returns>
@@ -86,7 +87,40 @@ namespace FluentSpotifyApi.Core.Client
                 uri, 
                 httpMethod, 
                 queryStringParameters, 
-                () => CreateJsonHttpStringContent(requestBody), 
+                innerCt => Task.FromResult(CreateJsonHttpStringContent(requestBody)), 
+                requestHeaders,
+                cancellationToken,
+                routeValues);
+        }
+
+        /// <summary>
+        /// Sends request to the server and deserializes response to an instance of <typeparamref name="T" /> using JSON serializer.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="uri">The URI.</param>
+        /// <param name="httpMethod">The HTTP method.</param>
+        /// <param name="queryStringParameters">The query string parameters.</param>
+        /// <param name="streamProvider">The stream provider.</param>
+        /// <param name="streamContentType">The stream content type.</param>
+        /// <param name="requestHeaders">The request headers.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <param name="routeValues">The route values.</param>
+        /// <returns></returns>
+        public Task<T> SendWithStreamBodyAsync<T>(
+            Uri uri,
+            HttpMethod httpMethod,
+            object queryStringParameters,
+            Func<CancellationToken, Task<Stream>> streamProvider,
+            string streamContentType,
+            IEnumerable<KeyValuePair<string, string>> requestHeaders,
+            CancellationToken cancellationToken,
+            params object[] routeValues)
+        {
+            return this.SendInternalAsync<T>(
+                uri,
+                httpMethod,
+                queryStringParameters,
+                innerCt => CreateBase64StreamContentAsync(streamProvider, streamContentType, innerCt),
                 requestHeaders,
                 cancellationToken,
                 routeValues);
@@ -128,7 +162,7 @@ namespace FluentSpotifyApi.Core.Client
             return transformer.Transform(firstMatchingSourceValue.Value);
         }
 
-        private static FormUrlEncodedContent CreateHttpFormUrlEncodedContent(object parameters)
+        private static HttpContent CreateHttpFormUrlEncodedContent(object parameters)
         {
             return parameters == null 
                 ? 
@@ -137,16 +171,37 @@ namespace FluentSpotifyApi.Core.Client
                 new FormUrlEncodedContent(SpotifyObjectHelpers.GetPropertyBag(parameters).Select(item => new KeyValuePair<string, string>(item.Key, item.Value.ToInvariantString())));
         }
 
-        private static StringContent CreateJsonHttpStringContent<T>(T value)
+        private static HttpContent CreateJsonHttpStringContent<T>(T value)
         {
             return new StringContent(JsonConvert.SerializeObject(value), Encoding.UTF8, "application/json");
+        }
+
+        private static async Task<HttpContent> CreateBase64StreamContentAsync(
+            Func<CancellationToken, Task<Stream>> streamProvider, 
+            string streamContentType, 
+            CancellationToken cancellationToken)
+        {
+            var stream = await streamProvider(cancellationToken).ConfigureAwait(false);
+
+            ICryptoTransform base64Transform = null;
+
+#if (NETSTANDARD1_4 || NETSTANDARD1_5 || NETSTANDARD1_6)
+            base64Transform = new NCode.CryptoTransforms.ToBase64Transform();
+#else
+            base64Transform = new ToBase64Transform();
+#endif
+
+            var streamContent = new StreamContent(new CryptoStream(stream, base64Transform, CryptoStreamMode.Read));
+            streamContent.Headers.Add("Content-Type", streamContentType);
+
+            return streamContent;
         }
 
         private Task<T> SendInternalAsync<T>(
             Uri uri, 
             HttpMethod httpMethod, 
             object queryStringParameters, 
-            Func<HttpContent> requestContentProvider, 
+            Func<CancellationToken, Task<HttpContent>> requestContentProvider, 
             IEnumerable<KeyValuePair<string, string>> requestHeaders,
             CancellationToken cancellationToken,
             object[] routeValues)
@@ -157,7 +212,7 @@ namespace FluentSpotifyApi.Core.Client
                     httpMethod,
                     requestHeaders.EmptyIfNull().ToList().AsReadOnly(),
                     requestContentProvider,
-                    async content =>
+                    async (content, innerCt) =>
                     {
                         using (var stream = await content.ReadAsStreamAsync().ConfigureAwait(false))
                         using (var streamReader = new StreamReader(stream))

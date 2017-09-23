@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentSpotifyApi.Model;
@@ -18,7 +19,7 @@ namespace FluentSpotifyApi.Builder.User.Playlists
 
         public Task<FullPlaylist> CreateAsync(CreatePlaylistDto createPlaylistDto, CancellationToken cancellationToken)
         {
-            return this.PostAsync<FullPlaylist, CreatePlaylistDto>(createPlaylistDto, cancellationToken);
+            return this.SendAsync<FullPlaylist, CreatePlaylistDto>(HttpMethod.Post, createPlaylistDto, cancellationToken);
         }
     }
 }

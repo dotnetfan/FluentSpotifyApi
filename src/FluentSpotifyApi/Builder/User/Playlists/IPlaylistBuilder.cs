@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentSpotifyApi.Builder.User.Playlists.Tracks;
@@ -28,6 +30,14 @@ namespace FluentSpotifyApi.Builder.User.Playlists
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
         Task UpdateAsync(UpdatePlaylistDto updatePlaylistDto, CancellationToken cancellationToken = default(CancellationToken));
+
+        /// <summary>
+        /// Replace the image used to represent a specific playlist.
+        /// </summary>
+        /// <param name="coverStreamProvider">The JPEG cover stream provider.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns></returns>
+        Task UpdateCoverAsync(Func<CancellationToken, Task<Stream>> coverStreamProvider, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Check to see if one or more Spotify users are following a specified playlist.

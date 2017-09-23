@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentSpotifyApi.Model;
@@ -16,7 +17,7 @@ namespace FluentSpotifyApi.Builder.User.Playlists.Tracks
 
         public Task<PlaylistSnapshot> RemoveAsync(string snapshotId, CancellationToken cancellationToken)
         {
-            return this.DeleteAsync<PlaylistSnapshot, TrackPositions>(new TrackPositions { Positions = this.Sequence.ToArray(), SnapshotId = snapshotId }, cancellationToken);
+            return this.SendAsync<PlaylistSnapshot, TrackPositions>(HttpMethod.Delete, new TrackPositions { Positions = this.Sequence.ToArray(), SnapshotId = snapshotId }, cancellationToken);
         }
 
         private class TrackPositions

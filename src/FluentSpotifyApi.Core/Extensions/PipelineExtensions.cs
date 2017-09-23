@@ -87,9 +87,9 @@ namespace FluentSpotifyApi.Core.Extensions
                     httpRequest.HttpMethod,
                     httpRequest.RequestHeaders,
                     httpRequest.RequestContentProvider,
-                    async httpContent =>
+                    async (httpContent, cancellationToken) =>
                     {
-                        var result = await httpRequest.ResponseProcessor(httpContent).ConfigureAwait(false);
+                        var result = await httpRequest.ResponseProcessor(httpContent, cancellationToken).ConfigureAwait(false);
                         return (TDestination)(object)result;
                     });
             }

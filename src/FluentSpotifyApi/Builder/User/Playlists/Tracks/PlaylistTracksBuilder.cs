@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentSpotifyApi.Model;
@@ -19,7 +20,8 @@ namespace FluentSpotifyApi.Builder.User.Playlists.Tracks
 
         public Task<PlaylistSnapshot> ReorderAsync(int rangeStart, int insertBefore, int rangeLength, string snapshotId, CancellationToken cancellationToken)
         {
-            return this.PutAsync<PlaylistSnapshot, ReoderParameters>(
+            return this.SendAsync<PlaylistSnapshot, ReoderParameters>(
+                HttpMethod.Put,
                 new ReoderParameters { RangeStart = rangeStart, InsertBefore = insertBefore, RangeLength = rangeLength, SnapshotId = snapshotId }, 
                 cancellationToken);
         }

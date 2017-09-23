@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentSpotifyApi.Model;
@@ -15,7 +16,8 @@ namespace FluentSpotifyApi.Builder.User.Playlists.Tracks
 
         public Task<PlaylistSnapshot> AddAsync(int? position, CancellationToken cancellationToken)
         {
-            return this.PostAsync<PlaylistSnapshot, TrackUrls>(
+            return this.SendAsync<PlaylistSnapshot, TrackUrls>(
+                HttpMethod.Post,
                 new TrackUrls { Uris = this.Sequence.Select(item => GetTrackUrl(item)).ToArray() },
                 cancellationToken,
                 optionalQueryStringParameters: new { position });
@@ -23,14 +25,16 @@ namespace FluentSpotifyApi.Builder.User.Playlists.Tracks
 
         public Task<PlaylistSnapshot> RemoveAsync(CancellationToken cancellationToken)
         {
-            return this.DeleteAsync<PlaylistSnapshot, TrackUrlWithPositions>(
+            return this.SendAsync<PlaylistSnapshot, TrackUrlWithPositions>(
+                HttpMethod.Delete,
                 new TrackUrlWithPositions { Tracks = this.Sequence.Select(item => new TrackUrlWithPosition { Uri = GetTrackUrl(item) }).ToArray() },
                 cancellationToken);
         }
 
         public Task<PlaylistSnapshot> ReplaceAsync(CancellationToken cancellationToken)
         {
-            return this.PutAsync<PlaylistSnapshot, TrackUrls>(
+            return this.SendAsync<PlaylistSnapshot, TrackUrls>(
+                HttpMethod.Put,
                 new TrackUrls { Uris = this.Sequence.Select(item => GetTrackUrl(item)).ToArray() }, 
                 cancellationToken);
         }

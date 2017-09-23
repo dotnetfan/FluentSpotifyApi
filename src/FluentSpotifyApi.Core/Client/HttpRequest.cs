@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace FluentSpotifyApi.Core.Client
@@ -15,8 +16,8 @@ namespace FluentSpotifyApi.Core.Client
             IUriFromValuesBuilder uriFromValuesBuilder, 
             HttpMethod httpMethod,
             IReadOnlyCollection<KeyValuePair<string, string>> requestHeaders,            
-            Func<HttpContent> requestContentProvider,
-            Func<HttpContent, Task<TResult>> responseProcessor)
+            Func<CancellationToken, Task<HttpContent>> requestContentProvider,
+            Func<HttpContent, CancellationToken, Task<TResult>> responseProcessor)
         {
             this.UriFromValuesBuilder = uriFromValuesBuilder;
             this.HttpMethod = httpMethod;
@@ -65,7 +66,7 @@ namespace FluentSpotifyApi.Core.Client
         /// <value>
         /// The request content provider.
         /// </value>
-        public Func<HttpContent> RequestContentProvider { get; private set; }
+        public Func<CancellationToken, Task<HttpContent>> RequestContentProvider { get; private set; }
 
         /// <summary>
         /// Gets the response processor.
@@ -73,7 +74,7 @@ namespace FluentSpotifyApi.Core.Client
         /// <value>
         /// The response processor.
         /// </value>
-        public Func<HttpContent, Task<TResult>> ResponseProcessor { get; private set; }
+        public Func<HttpContent, CancellationToken, Task<TResult>> ResponseProcessor { get; private set; }
 
         /// <summary>
         /// Replaces the URI from values builder.
@@ -119,7 +120,7 @@ namespace FluentSpotifyApi.Core.Client
         /// </summary>
         /// <param name="valueProvider">The value provider.</param>
         /// <returns></returns>
-        public HttpRequest<TResult> ReplaceRequestContentProvider(Func<Func<HttpContent>, Func<HttpContent>> valueProvider)
+        public HttpRequest<TResult> ReplaceRequestContentProvider(Func<Func<CancellationToken, Task<HttpContent>>, Func<CancellationToken, Task<HttpContent>>> valueProvider)
         {
             var result = new HttpRequest<TResult>(this);
             result.RequestContentProvider = valueProvider(result.RequestContentProvider);
@@ -132,7 +133,7 @@ namespace FluentSpotifyApi.Core.Client
         /// </summary>
         /// <param name="valueProvider">The value provider.</param>
         /// <returns></returns>
-        public HttpRequest<TResult> ReplaceResponseProcessor(Func<Func<HttpContent, Task<TResult>>, Func<HttpContent, Task<TResult>>> valueProvider)
+        public HttpRequest<TResult> ReplaceResponseProcessor(Func<Func<HttpContent, CancellationToken, Task<TResult>>, Func<HttpContent, CancellationToken, Task<TResult>>> valueProvider)
         {
             var result = new HttpRequest<TResult>(this);
             result.ResponseProcessor = valueProvider(result.ResponseProcessor);

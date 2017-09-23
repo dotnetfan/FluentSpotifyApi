@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -15,12 +16,12 @@ namespace FluentSpotifyApi.Builder.Me.Library
 
         public Task SaveAsync(CancellationToken cancellationToken)
         {
-            return this.PutAsync<object, IdsWrapper>(new IdsWrapper { Ids = this.Sequence.ToList() }, cancellationToken);
+            return this.SendAsync<object, IdsWrapper>(HttpMethod.Put, new IdsWrapper { Ids = this.Sequence.ToList() }, cancellationToken);
         }
 
         public Task RemoveAsync(CancellationToken cancellationToken)
         {
-            return this.DeleteAsync<object, IdsWrapper>(new IdsWrapper { Ids = this.Sequence.ToList() }, cancellationToken);
+            return this.SendAsync<object, IdsWrapper>(HttpMethod.Delete, new IdsWrapper { Ids = this.Sequence.ToList() }, cancellationToken);
         }
 
         public Task<bool[]> CheckAsync(CancellationToken cancellationToken)

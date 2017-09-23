@@ -365,5 +365,22 @@ namespace FluentSpotifyApi.UnitTests
             mockResults.First().RequestPayload.Value<bool>("collaborative").Should().Be(dto.Collaborative.Value);
             mockResults.First().RequestPayload.Value<string>("description").Should().Be(dto.Description);
         }
+
+        protected async Task ShouldUpdatePlaylistCoverAsync()
+        {
+            // Arrange
+            const string playlistId = "UGYSGU897UGY";
+           
+            var mockResults = this.MockPut();
+
+            // Act
+            var builder = this.GetPlaylistBuilder(playlistId);
+            await builder.UpdateCoverAsync(ct => null);
+
+            // Assert
+            mockResults.Should().HaveCount(1);
+            mockResults.First().QueryParameters.ShouldAllBeEquivalentTo(new(string Key, object Value)[0]);
+            mockResults.First().RouteValues.Should().Equal(new[] { "users", UserId, "playlists", playlistId, "images" });
+        }
     }
 }

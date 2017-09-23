@@ -103,6 +103,12 @@ namespace FluentSpotifyApi.UnitTests
             await this.ShouldUpdatePlaylistAsync();
         }
 
+        [TestMethod]
+        public async Task ShouldUpdateMyPlaylistCoverAsync()
+        {
+            await this.ShouldUpdatePlaylistCoverAsync();
+        }
+
         protected override IPlaylistBuilder GetPlaylistBuilder(string id)
         {
             return this.Client.Me.Playlist(id);
