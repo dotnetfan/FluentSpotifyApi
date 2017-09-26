@@ -16,7 +16,7 @@ namespace FluentSpotifyApi.Core.Internal.Extensions
         /// <param name="func">The function.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
-        public static Task ExecuteAsync(this SemaphoreSlim semaphore, Func<CancellationToken, Task> func, CancellationToken cancellationToken = default(CancellationToken))
+        public static Task ExecuteAsync(this SemaphoreSlim semaphore, Func<CancellationToken, Task> func, CancellationToken cancellationToken)
         {
             return semaphore.ExecuteAsync(async (innerCt) => { await func(innerCt).ConfigureAwait(false); return 0; }, cancellationToken);
         }
@@ -29,7 +29,7 @@ namespace FluentSpotifyApi.Core.Internal.Extensions
         /// <param name="func">The function.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
-        public static async Task<T> ExecuteAsync<T>(this SemaphoreSlim semaphore, Func<CancellationToken, Task<T>> func, CancellationToken cancellationToken = default(CancellationToken))
+        public static async Task<T> ExecuteAsync<T>(this SemaphoreSlim semaphore, Func<CancellationToken, Task<T>> func, CancellationToken cancellationToken)
         {
             await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
             try

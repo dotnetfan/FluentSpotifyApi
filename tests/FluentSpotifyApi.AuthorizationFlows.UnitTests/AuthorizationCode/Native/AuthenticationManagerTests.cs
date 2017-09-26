@@ -1,5 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using FluentAssertions;
+using FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Exceptions;
+using FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Native;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace FluentSpotifyApi.AuthorizationFlows.UnitTests.AuthorizationCode.Native
@@ -8,7 +11,7 @@ namespace FluentSpotifyApi.AuthorizationFlows.UnitTests.AuthorizationCode.Native
     public class AuthenticationManagerTests : TestBase
     {
         [TestMethod]
-        public async Task ShouldExecuteAuthorizationCodeFlowWhenThereIsNoSessionStoredAsync()
+        public async Task ShouldExecuteAuthorizationCodeFlowWhenThereIsNoSessionStoredWhenRestoreSessionOrAuthorizeUserAsyncIsCalledAsync()
         {
             // Arrange
             this.DateTimeOffsetProviderMock.Setup(x => x.GetUtcNow()).Returns(new System.DateTimeOffset(new System.DateTime(2015, 1, 1)));
@@ -27,7 +30,7 @@ namespace FluentSpotifyApi.AuthorizationFlows.UnitTests.AuthorizationCode.Native
         }
 
         [TestMethod]
-        public async Task ShouldRestoreSessionFromStorageAsync()
+        public async Task ShouldRestoreSessionFromStorageWhenRestoreSessionOrAuthorizeUserAsyncIsCalledAsync()
         {
             // Arrange
             var user = new FluentSpotifyApi.Core.Model.PrivateUser { Id = "testuser" };
@@ -51,6 +54,72 @@ namespace FluentSpotifyApi.AuthorizationFlows.UnitTests.AuthorizationCode.Native
             // Act + Assert
             await this.AuthenticationManager.RestoreSessionOrAuthorizeUserAsync();
             await this.AuthenticationManager.RestoreSessionOrAuthorizeUserAsync();
+        }
+
+        [TestMethod]
+        public async Task ShouldRestoreSessionFromStorageWhenRestoreSessionAsyncIsCalledAsync()
+        {
+            // Arrange
+            var user = new FluentSpotifyApi.Core.Model.PrivateUser { Id = "testuser" };
+            this.SecureStorage.SetItem(("testKey", user));
+
+            // Act
+            await this.AuthenticationManager.RestoreSessionAsync();
+
+            // Assert
+            this.AuthenticationManager.GetUser().ShouldBeEquivalentTo(user);
+        }
+
+        [TestMethod]
+        public void RestoreSessionAsyncShouldThrowSessionNotFoundExceptionWhenThereIsNoSessionInStorage()
+        {
+            // Arrange + Act + Assert
+            ((Func<Task>)(() => this.AuthenticationManager.RestoreSessionAsync())).ShouldThrow<SessionNotFoundException>();
+        }
+
+        [TestMethod]
+        public async Task ShouldCallRestoreSessionAsyncMultipleTimesWithoutErrorAsync()
+        {
+            // Arrange
+            var user = new FluentSpotifyApi.Core.Model.PrivateUser { Id = "testuser" };
+            this.SecureStorage.SetItem(("testKey", user));
+
+            // Act + Assert
+            await this.AuthenticationManager.RestoreSessionAsync();
+            await this.AuthenticationManager.RestoreSessionAsync();
+        }
+
+        [TestMethod]
+        public async Task GetSessionStateAsyncShouldReturnNotFoundWhenThereIsNoSessionStoredAsync()
+        {
+            // Arrange + Act + Assert
+            (await this.AuthenticationManager.GetSessionStateAsync()).Should().Be(SessionState.NotFound);
+        }
+
+        [TestMethod]
+        public async Task GetSessionStateAsyncShouldReturnStoredInLocalStorageWhenThereIsASessionInStorageThatHasNotBeenLoadedYetAsync()
+        {
+            // Arrange
+            var user = new FluentSpotifyApi.Core.Model.PrivateUser { Id = "testuser" };
+            this.SecureStorage.SetItem(("testKey", user));
+
+            // Act + Assert
+            (await this.AuthenticationManager.GetSessionStateAsync()).Should().Be(SessionState.StoredInLocalStorage);
+        }
+
+        [TestMethod]
+        public async Task GetSessionStateAsyncShouldReturnCachedInMemoryWhenThereIsASessionInMemoryAsync()
+        {
+            // Arrange
+            var user = new FluentSpotifyApi.Core.Model.PrivateUser { Id = "testuser" };
+            this.SecureStorage.SetItem(("testKey", user));
+
+            // Act
+            await this.AuthenticationManager.RestoreSessionAsync();
+            var result = await this.AuthenticationManager.GetSessionStateAsync();
+
+            // Assert
+            result.Should().Be(SessionState.CachedInMemory);
         }
 
         [TestMethod]

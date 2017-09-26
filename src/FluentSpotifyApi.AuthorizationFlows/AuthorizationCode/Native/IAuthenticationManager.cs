@@ -16,9 +16,9 @@ namespace FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Native
     {
         /// <summary>
         /// Executes authorization code flow (i.e. executes user authorization and gets authorization tokens and user information from Spotify Service), 
-        /// stores authentication ticket in the local secure storage and caches it in memory. In case there is already an authentication ticket 
-        /// stored in local secure storage, the authorization code flow is not executed and authentication ticket is loaded from the storage instead. 
-        /// This method does nothing when there is already an authentication ticket cached in memory.
+        /// stores session (i.e. authorization tokens and user information) in the local secure storage and caches it in memory. In case there is 
+        /// already a session stored in the local secure storage, the authorization code flow is not executed and session is restored 
+        /// from the storage instead. This method does nothing when there is already a session cached in memory.
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <exception cref="SpotifyAuthorizationException">
@@ -33,18 +33,33 @@ namespace FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Native
         Task RestoreSessionOrAuthorizeUserAsync(CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
+        /// Restores session from the local secure storage. This method does nothing when there is already a session cached in memory.
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <exception cref="Exceptions.SessionNotFoundException">
+        /// Thrown when there is no session stored in the local secure storage.
+        /// </exception>
+        Task RestoreSessionAsync(CancellationToken cancellationToken = default(CancellationToken));
+
+        /// <summary>
+        /// Gets session state.
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<SessionState> GetSessionStateAsync(CancellationToken cancellationToken = default(CancellationToken));
+
+        /// <summary>
         /// Gets information about current user. 
         /// </summary>
         /// <returns>
-        /// Information about current user if <see cref="RestoreSessionOrAuthorizeUserAsync"/> has been called,
+        /// Information about current user if <see cref="RestoreSessionOrAuthorizeUserAsync"/> or <see cref="RestoreSessionAsync"/> has been called,
         /// <c>null</c> otherwise.</returns>
         PrivateUser GetUser();
-
+      
         /// <summary>
-        /// Removes authentication ticket from local secure storage and from memory.
+        /// Removes session from the local secure storage and from memory.
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns></returns>
-        Task RemoveSessionAsync(CancellationToken cancellationToken = default(CancellationToken));
+        Task RemoveSessionAsync(CancellationToken cancellationToken = default(CancellationToken));        
     }
 }

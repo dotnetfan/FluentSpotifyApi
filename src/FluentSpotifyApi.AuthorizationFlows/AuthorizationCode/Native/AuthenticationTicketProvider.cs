@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Exceptions;
 using FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Native.Extensions;
 using FluentSpotifyApi.AuthorizationFlows.Core;
 using FluentSpotifyApi.AuthorizationFlows.Core.Client.Authorization;
@@ -13,7 +14,7 @@ using FluentSpotifyApi.Core.Model;
 
 namespace FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Native
 {
-    internal class AuthenticationTicketProvider : IAuthenticationTicketProvider, IAuthenticationManager
+    internal class AuthenticationTicketProvider : IAuthenticationTicketProvider, IAuthenticationManager, IDisposable
     {      
         private readonly IAuthenticationTicketStorage authenticationTicketStorage;
 
@@ -25,7 +26,7 @@ namespace FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Native
 
         private readonly IDateTimeOffsetProvider dateTimeOffsetProvider;
 
-        private readonly SemaphoreSlim semaphoreSlim;
+        private readonly SemaphoreSlim semaphore;
 
         private readonly object locker;
 
@@ -44,13 +45,13 @@ namespace FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Native
             this.userHttpClient = userHttpClient;
             this.dateTimeOffsetProvider = dateTimeOffsetProvider;
 
-            this.semaphoreSlim = new SemaphoreSlim(1);
+            this.semaphore = new SemaphoreSlim(1);
             this.locker = new object();
         }
 
         public async Task<IAuthenticationTicket> GetAsync(CancellationToken cancellationToken)
         {
-            var result = await this.semaphoreSlim.ExecuteAsync(
+            var result = await this.semaphore.ExecuteAsync(
                 async innerCt =>
                 {
                     this.ValidateAuthenticationTicket();
@@ -74,7 +75,7 @@ namespace FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Native
                 throw new ArgumentNullException(nameof(currentAuthenticationTicket));
             }
 
-            var result = await this.semaphoreSlim.ExecuteAsync(
+            var result = await this.semaphore.ExecuteAsync(
                 async innerCt =>
                 {
                     this.ValidateAuthenticationTicket();
@@ -93,20 +94,52 @@ namespace FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Native
        
         public Task RestoreSessionOrAuthorizeUserAsync(CancellationToken cancellationToken)
         {
-            return this.semaphoreSlim.ExecuteAsync(
+            return this.semaphore.ExecuteAsync(
                 async innerCt =>
                 {
                     if (this.authenticationTicket == null)
                     {
-                        var storedAuthenticationTicket = await this.authenticationTicketStorage.GetAsync(innerCt).ConfigureAwait(false);
-                        if (storedAuthenticationTicket != null)
-                        {
-                            this.UpdateAuthenticationTicketSafe(storedAuthenticationTicket);
-                        }
-                        else
+                        if (!(await this.TryRestoreAuthenticationTicketAsync(innerCt).ConfigureAwait(false)))
                         {
                             await this.LoadAuthenticationTicketAsync(innerCt).ConfigureAwait(false);
                         }
+                    }
+                },
+                cancellationToken);
+        }
+
+        public Task RestoreSessionAsync(CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return this.semaphore.ExecuteAsync(
+                async innerCt =>
+                {
+                    if (this.authenticationTicket == null)
+                    {
+                        if (!(await this.TryRestoreAuthenticationTicketAsync(innerCt).ConfigureAwait(false)))
+                        {
+                            throw new SessionNotFoundException();
+                        }
+                    }
+                }, 
+                cancellationToken);
+        }
+
+        public Task<SessionState> GetSessionStateAsync(CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return this.semaphore.ExecuteAsync(
+                async innerCt =>
+                {
+                    if (this.authenticationTicket != null)
+                    {
+                        return SessionState.CachedInMemory;
+                    }
+                    else if ((await this.authenticationTicketStorage.GetAsync(innerCt).ConfigureAwait(false)) != null)
+                    {
+                        return SessionState.StoredInLocalStorage;
+                    }
+                    else
+                    {
+                        return SessionState.NotFound;
                     }
                 },
                 cancellationToken);
@@ -116,12 +149,17 @@ namespace FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Native
 
         public Task RemoveSessionAsync(CancellationToken cancellationToken)
         {
-            return this.semaphoreSlim.ExecuteAsync(
+            return this.semaphore.ExecuteAsync(
                 async innerCt =>
                 {
                     await this.UnloadAuthenticationTicketAsync(innerCt).ConfigureAwait(false);
                 },
                 cancellationToken);
+        }
+
+        public void Dispose()
+        {
+            this.semaphore.Dispose();
         }
 
         private void ValidateAuthenticationTicket()
@@ -130,6 +168,18 @@ namespace FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Native
             {
                 throw new UnauthorizedAccessException();
             }
+        }
+
+        private async Task<bool> TryRestoreAuthenticationTicketAsync(CancellationToken cancellationToken)
+        {
+            var storedAuthenticationTicket = await this.authenticationTicketStorage.GetAsync(cancellationToken).ConfigureAwait(false);
+            if (storedAuthenticationTicket != null)
+            {
+                this.UpdateAuthenticationTicketSafe(storedAuthenticationTicket);
+                return true;
+            }
+
+            return false;
         }
 
         private async Task LoadAuthenticationTicketAsync(CancellationToken cancellationToken)

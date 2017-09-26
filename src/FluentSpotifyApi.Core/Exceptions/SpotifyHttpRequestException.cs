@@ -6,7 +6,7 @@ namespace FluentSpotifyApi.Core.Exceptions
     /// The exception that shields any exception thrown by <see cref="System.Net.Http.HttpClient.SendAsync(System.Net.Http.HttpRequestMessage, System.Threading.CancellationToken)"/> 
     /// or during processing of the response stream. The inner exception always contains the original exception.
     /// </summary>
-    /// <seealso cref="FluentSpotifyApi.Core.Exceptions.SpotifyServiceException" />
+    /// <seealso cref="SpotifyServiceException" />
     public class SpotifyHttpRequestException : SpotifyServiceException
     {
         /// <summary>

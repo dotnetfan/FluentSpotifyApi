@@ -6,7 +6,7 @@ namespace FluentSpotifyApi.AuthorizationFlows.Exceptions
     /// <summary>
     /// The exception that is thrown when user authorization fails.
     /// </summary>
-    /// <seealso cref="FluentSpotifyApi.Core.Exceptions.SpotifyServiceException" />
+    /// <seealso cref="SpotifyServiceException" />
     public class SpotifyAuthorizationException : SpotifyServiceException
     {
         /// <summary>

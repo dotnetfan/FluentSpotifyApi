@@ -6,7 +6,7 @@ namespace FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Exceptions
     /// <summary>
     /// The exception that is thrown when the refresh token is invalid.
     /// </summary>
-    /// <seealso cref="FluentSpotifyApi.Core.Exceptions.SpotifyServiceException" />
+    /// <seealso cref="SpotifyServiceException" />
     public class SpotifyInvalidRefreshTokenException : SpotifyServiceException
     {
         /// <summary>
