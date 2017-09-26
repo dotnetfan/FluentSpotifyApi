@@ -15,6 +15,6 @@ namespace FluentSpotifyApi.Model.Messages
         /// The devices.
         /// </value>
         [JsonProperty(PropertyName = "devices")]
-        public Device[] Devices { get; set; }
+        public Device[] Items { get; set; }
     }
 }
