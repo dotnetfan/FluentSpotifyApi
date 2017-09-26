@@ -9,8 +9,8 @@ namespace FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Native
 {
     /// <summary>
     /// The authentication manager for authorization code flow for native apps.
-    /// The <see cref="RestoreSessionOrAuthorizeUserAsync"/> has to be called before
-    /// any Spotify Web API request is made. Otherwise <see cref="UnauthorizedAccessException"/> is thrown.
+    /// The <see cref="RestoreSessionOrAuthorizeUserAsync"/> or <see cref="RestoreSessionAsync"/> has to be called 
+    /// before any Spotify Web API request is made. Otherwise <see cref="UnauthorizedAccessException"/> is thrown.
     /// </summary>
     public interface IAuthenticationManager
     {
