@@ -46,11 +46,16 @@ namespace FluentSpotifyApi.Core.UnitTests
                       requestContent.Should().BeOfType<FormUrlEncodedContent>().Which.ReadAsStringAsync().Result.Should().Be("bodyKey1=body+test+value%3F&bodyKey2=test+2");
 
                       var stringContent = new StringContent(JsonConvert.SerializeObject(testResult));
-                      return await h.ResponseProcessor(stringContent, c);
+                      return await h.ResponseProcessor(new HttpResponseMessage(System.Net.HttpStatusCode.OK) { Content = stringContent }, c);
                   }));
 
             // Act
-            var result = await new TypedHttpClient(mock.Object).SendAsync<TestResult>(uri, httpMethod, queryStringParameters, requestBodyParameters, requestHeaders, CancellationToken.None, routeValues);
+            var result = await new TypedHttpClient(mock.Object).SendAsync<TestResult>(
+                new Client.UriParts { BaseUri = uri, QueryStringParameters = queryStringParameters, RouteValues = routeValues }, 
+                httpMethod, 
+                requestHeaders,
+                requestBodyParameters,
+                CancellationToken.None);
 
             // Assert   
             result.ShouldBeEquivalentTo(testResult);
@@ -84,11 +89,16 @@ namespace FluentSpotifyApi.Core.UnitTests
                     requestContent.Should().BeOfType<StringContent>().Which.ReadAsStringAsync().Result.Yield().Select(item => JsonConvert.DeserializeObject<Body>(item)).First().ShouldBeEquivalentTo(requestBody);
 
                     var stringContent = new StringContent(JsonConvert.SerializeObject(testResult));
-                    return await h.ResponseProcessor(stringContent, c);
+                    return await h.ResponseProcessor(new HttpResponseMessage(System.Net.HttpStatusCode.OK) { Content = stringContent }, c);
                 }));
 
             // Act
-            var result = await new TypedHttpClient(mock.Object).SendWithJsonBodyAsync<TestResult, Body>(uri, httpMethod, queryStringParameters, requestBody, requestHeaders, CancellationToken.None, routeValues);
+            var result = await new TypedHttpClient(mock.Object).SendWithJsonBodyAsync<TestResult, Body>(
+                new Client.UriParts { BaseUri = uri, QueryStringParameters = queryStringParameters, RouteValues = routeValues },
+                httpMethod,
+                requestHeaders,
+                requestBody,
+                CancellationToken.None);
 
             // Assert   
             result.ShouldBeEquivalentTo(testResult);
@@ -129,14 +139,39 @@ namespace FluentSpotifyApi.Core.UnitTests
                     Encoding.ASCII.GetString(ms.ToArray()).Should().Be(expectedStreamResult);
 
                     var stringContent = new StringContent(JsonConvert.SerializeObject(testResult));
-                    return await h.ResponseProcessor(stringContent, c);
+                    return await h.ResponseProcessor(new HttpResponseMessage(System.Net.HttpStatusCode.OK) { Content = stringContent }, c);
                 }));
 
             // Act
-            var result = await new TypedHttpClient(mock.Object).SendWithStreamBodyAsync<TestResult>(uri, httpMethod, queryStringParameters, streamProvider, streamContentType, requestHeaders, CancellationToken.None, routeValues);
+            var result = await new TypedHttpClient(mock.Object).SendWithStreamBodyAsync<TestResult>(
+                new Client.UriParts { BaseUri = uri, QueryStringParameters = queryStringParameters, RouteValues = routeValues },
+                httpMethod,
+                requestHeaders,
+                streamProvider,
+                streamContentType,
+                CancellationToken.None);
 
             // Assert   
             result.ShouldBeEquivalentTo(testResult);
+        }
+
+        [TestMethod]
+        public void ShouldThrowExceptionWhenHttpStatusCodeToExceptionAttributeIsDefined()
+        {
+            // Arrange
+            var mock = new Mock<IHttpClientWrapper>();
+            mock.Setup(x => x
+                .SendAsync(
+                    It.IsAny<HttpRequest<TestResultWithHttpStatusCodeToExceptionAttribute>>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns((Func<HttpRequest<TestResultWithHttpStatusCodeToExceptionAttribute>, CancellationToken, Task<TestResultWithHttpStatusCodeToExceptionAttribute>>)(async (h, c) =>
+                {
+                    return await h.ResponseProcessor(new HttpResponseMessage(System.Net.HttpStatusCode.Accepted), c);
+                }));
+
+            // Act + Assert
+            ((Func<Task>)(() => new TypedHttpClient(mock.Object).SendAsync<TestResultWithHttpStatusCodeToExceptionAttribute>(new Client.UriParts { BaseUri = new Uri("http://localhost") }, HttpMethod.Get, null, null, CancellationToken.None)))
+                 .ShouldThrow<TestException>();
         }
 
         private class TestResult
@@ -155,6 +190,15 @@ namespace FluentSpotifyApi.Core.UnitTests
 
             [JsonProperty(PropertyName = "bodyB")]
             public int Body2 { get; set; }
+        }
+
+        [HttpStatusCodeToException(StatusCode = System.Net.HttpStatusCode.Accepted, ExceptionType = typeof(TestException))]
+        private class TestResultWithHttpStatusCodeToExceptionAttribute
+        {
+        }
+
+        private class TestException : Exception
+        {
         }
     }
 }

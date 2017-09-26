@@ -12,6 +12,7 @@ using FluentSpotifyApi.Builder.Search;
 using FluentSpotifyApi.Builder.Tracks;
 using FluentSpotifyApi.Builder.User;
 using FluentSpotifyApi.Client;
+using FluentSpotifyApi.Core.Client;
 using FluentSpotifyApi.Core.Options;
 using FluentSpotifyApi.Options;
 
@@ -49,6 +50,9 @@ namespace FluentSpotifyApi
 
         public IUserBuilder User(string id) => new Builder.User.UserBuilder(this.contextData, id);
 
-        public Task<T> GetAsync<T>(Uri url, CancellationToken cancellationToken) => this.contextData.SpotifyHttpClient.SendAsync<T>(url, HttpMethod.Get, null, null, null, cancellationToken);
+        public Task<T> GetAsync<T>(Uri url, CancellationToken cancellationToken)
+        {
+            return this.contextData.SpotifyHttpClient.SendAsync<T>(new UriParts { BaseUri = url }, HttpMethod.Get, null, null, cancellationToken);
+        }
     }
 }

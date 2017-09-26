@@ -13,69 +13,54 @@ namespace FluentSpotifyApi.Core.Client
     public interface ITypedHttpClient
     {
         /// <summary>
-        /// Sends request to the server and deserializes response to an instance of <typeparamref name="T" /> using JSON serializer.
+        /// Sends request to the server and deserializes response to an instance of <typeparamref name="TResult" /> using JSON serializer.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="uri">The URI.</param>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="uriParts">The URI parts.</param>
         /// <param name="httpMethod">The HTTP method.</param>
-        /// <param name="queryStringParameters">The query string parameters.</param>
-        /// <param name="requestBodyParameters">The request body parameters.</param>
         /// <param name="requestHeaders">The request headers.</param>
+        /// <param name="requestBodyParameters">The request body parameters.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        /// <param name="routeValues">The route values.</param>
-        /// <returns></returns>
-        Task<T> SendAsync<T>(
-            Uri uri, 
-            HttpMethod httpMethod, 
-            object queryStringParameters, 
-            object requestBodyParameters, 
+        Task<TResult> SendAsync<TResult>(
+            UriParts uriParts, 
+            HttpMethod httpMethod,              
             IEnumerable<KeyValuePair<string, string>> requestHeaders,
-            CancellationToken cancellationToken,
-            params object[] routeValues);
+            object requestBodyParameters,
+            CancellationToken cancellationToken);
 
         /// <summary>
         /// Sends request to the server and deserializes response to an instance of <typeparamref name="TResult" /> using JSON serializer.
         /// </summary>
         /// <typeparam name="TResult">The type of the result.</typeparam>
         /// <typeparam name="TRequestBody">The type of the JSON serializable request body.</typeparam>
-        /// <param name="uri">The URI.</param>
+        /// <param name="uriParts">The URI parts.</param>
         /// <param name="httpMethod">The HTTP method.</param>
-        /// <param name="queryStringParameters">The query string parameters.</param>
-        /// <param name="requestBody">The JSON serializable request body.</param>
         /// <param name="requestHeaders">The request headers.</param>
+        /// <param name="requestBody">The JSON serializable request body.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        /// <param name="routeValues">The route values.</param>
-        /// <returns></returns>
         Task<TResult> SendWithJsonBodyAsync<TResult, TRequestBody>(
-            Uri uri, 
-            HttpMethod httpMethod, 
-            object queryStringParameters,
-            TRequestBody requestBody,
+            UriParts uriParts,
+            HttpMethod httpMethod,             
             IEnumerable<KeyValuePair<string, string>> requestHeaders,
-            CancellationToken cancellationToken,
-            params object[] routeValues);
+            TRequestBody requestBody,
+            CancellationToken cancellationToken);
 
         /// <summary>
-        /// Sends request to the server and deserializes response to an instance of <typeparamref name="T" /> using JSON serializer.
+        /// Sends request to the server and deserializes response to an instance of <typeparamref name="TResult" /> using JSON serializer.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="uri">The URI.</param>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="uriParts">The URI parts.</param>
         /// <param name="httpMethod">The HTTP method.</param>
-        /// <param name="queryStringParameters">The query string parameters.</param>
+        /// <param name="requestHeaders">The request headers.</param>
         /// <param name="streamProvider">The stream provider.</param>
         /// <param name="streamContentType">The stream content type.</param>
-        /// <param name="requestHeaders">The request headers.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        /// <param name="routeValues">The route values.</param>
-        /// <returns></returns>
-        Task<T> SendWithStreamBodyAsync<T>(
-            Uri uri,
+        Task<TResult> SendWithStreamBodyAsync<TResult>(
+            UriParts uriParts,
             HttpMethod httpMethod,
-            object queryStringParameters,
+            IEnumerable<KeyValuePair<string, string>> requestHeaders,
             Func<CancellationToken, Task<Stream>> streamProvider,
             string streamContentType,
-            IEnumerable<KeyValuePair<string, string>> requestHeaders,
-            CancellationToken cancellationToken,
-            params object[] routeValues);
+            CancellationToken cancellationToken);
     }
 }

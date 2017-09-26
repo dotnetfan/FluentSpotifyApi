@@ -2,6 +2,7 @@
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentSpotifyApi.Core.Client;
 using FluentSpotifyApi.Core.Model;
 using FluentSpotifyApi.Core.Options;
 
@@ -37,11 +38,10 @@ namespace FluentSpotifyApi.AuthorizationFlows.Core.Client.User
         public Task<PrivateUser> GetCurrentUserAsync(string accessToken, CancellationToken cancellationToken)
         {
             return this.authorizationFlowsHttpClient.SendAsync<PrivateUser>(                
-                this.userClientOptionsProvider.Get().UserInformationEndpoint,
+                new UriParts { BaseUri = this.userClientOptionsProvider.Get().UserInformationEndpoint },
                 HttpMethod.Get,
-                null,
-                null,
                 new[] { new KeyValuePair<string, string>("Authorization", $"Bearer {accessToken}") },
+                null,
                 cancellationToken);
         }
     }

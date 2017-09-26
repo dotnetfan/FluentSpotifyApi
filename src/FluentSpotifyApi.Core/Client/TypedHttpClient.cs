@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
@@ -31,34 +32,27 @@ namespace FluentSpotifyApi.Core.Client
         }
 
         /// <summary>
-        /// Sends request to the server and deserializes response to an instance of <typeparamref name="T" /> using JSON serializer.
+        /// Sends request to the server and deserializes response to an instance of <typeparamref name="TResult" /> using JSON serializer.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="uri">The URI.</param>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="uriParts">The URI parts.</param>
         /// <param name="httpMethod">The HTTP method.</param>
-        /// <param name="queryStringParameters">The query string parameters.</param>
-        /// <param name="requestBodyParameters">The request body parameters.</param>
         /// <param name="requestHeaders">The request headers.</param>
+        /// <param name="requestBodyParameters">The request body parameters.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        /// <param name="routeValues">The route values.</param>
-        /// <returns></returns>
-        public Task<T> SendAsync<T>(
-            Uri uri, 
+        public Task<TResult> SendAsync<TResult>(
+            UriParts uriParts,
             HttpMethod httpMethod, 
-            object queryStringParameters, 
-            object requestBodyParameters, 
             IEnumerable<KeyValuePair<string, string>> requestHeaders,
-            CancellationToken cancellationToken,
-            params object[] routeValues)
+            object requestBodyParameters,
+            CancellationToken cancellationToken)
         {
-            return this.SendInternalAsync<T>(
-                uri, 
-                httpMethod, 
-                queryStringParameters, 
-                innerCt => Task.FromResult(CreateHttpFormUrlEncodedContent(requestBodyParameters)), 
+            return this.SendInternalAsync<TResult>(
+                uriParts, 
+                httpMethod,                
                 requestHeaders,
-                cancellationToken,
-                routeValues);
+                innerCt => Task.FromResult(CreateHttpFormUrlEncodedContent(requestBodyParameters)),
+                cancellationToken);
         }
 
         /// <summary>
@@ -66,74 +60,60 @@ namespace FluentSpotifyApi.Core.Client
         /// </summary>
         /// <typeparam name="TResult">The type of the result.</typeparam>
         /// <typeparam name="TRequestBody">The type of the JSON serializable request body.</typeparam>
-        /// <param name="uri">The URI.</param>
+        /// <param name="uriParts">The URI parts.</param>
         /// <param name="httpMethod">The HTTP method.</param>
-        /// <param name="queryStringParameters">The query string parameters.</param>
-        /// <param name="requestBody">The JSON serializable request body.</param> 
         /// <param name="requestHeaders">The request headers.</param>
+        /// <param name="requestBody">The JSON serializable request body.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        /// <param name="routeValues">The route values.</param>
-        /// <returns></returns>
         public Task<TResult> SendWithJsonBodyAsync<TResult, TRequestBody>(
-            Uri uri, 
-            HttpMethod httpMethod, 
-            object queryStringParameters,
-            TRequestBody requestBody,
+            UriParts uriParts,
+            HttpMethod httpMethod,
             IEnumerable<KeyValuePair<string, string>> requestHeaders,
-            CancellationToken cancellationToken,
-            params object[] routeValues)
+            TRequestBody requestBody,
+            CancellationToken cancellationToken)
         {
             return this.SendInternalAsync<TResult>(
-                uri, 
-                httpMethod, 
-                queryStringParameters, 
-                innerCt => Task.FromResult(CreateJsonHttpStringContent(requestBody)), 
+                uriParts, 
+                httpMethod,                 
                 requestHeaders,
-                cancellationToken,
-                routeValues);
+                innerCt => Task.FromResult(CreateJsonHttpStringContent(requestBody)),
+                cancellationToken);
         }
 
         /// <summary>
-        /// Sends request to the server and deserializes response to an instance of <typeparamref name="T" /> using JSON serializer.
+        /// Sends request to the server and deserializes response to an instance of <typeparamref name="TResult" /> using JSON serializer.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="uri">The URI.</param>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="uriParts">The URI parts.</param>
         /// <param name="httpMethod">The HTTP method.</param>
-        /// <param name="queryStringParameters">The query string parameters.</param>
+        /// <param name="requestHeaders">The request headers.</param>
         /// <param name="streamProvider">The stream provider.</param>
         /// <param name="streamContentType">The stream content type.</param>
-        /// <param name="requestHeaders">The request headers.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
-        /// <param name="routeValues">The route values.</param>
-        /// <returns></returns>
-        public Task<T> SendWithStreamBodyAsync<T>(
-            Uri uri,
+        public Task<TResult> SendWithStreamBodyAsync<TResult>(
+            UriParts uriParts,
             HttpMethod httpMethod,
-            object queryStringParameters,
+            IEnumerable<KeyValuePair<string, string>> requestHeaders,
             Func<CancellationToken, Task<Stream>> streamProvider,
             string streamContentType,
-            IEnumerable<KeyValuePair<string, string>> requestHeaders,
-            CancellationToken cancellationToken,
-            params object[] routeValues)
+            CancellationToken cancellationToken)
         {
-            return this.SendInternalAsync<T>(
-                uri,
+            return this.SendInternalAsync<TResult>(
+                uriParts,
                 httpMethod,
-                queryStringParameters,
-                innerCt => CreateBase64StreamContentAsync(streamProvider, streamContentType, innerCt),
                 requestHeaders,
-                cancellationToken,
-                routeValues);
+                innerCt => CreateBase64StreamContentAsync(streamProvider, streamContentType, innerCt),
+                cancellationToken);
         }
 
-        private static Uri GetCompleteUri(IList<KeyValuePair<Type, object>> transformersSourceValues, Uri uri, object queryStringParameters, object[] routeValues)
+        private static Uri GetCompleteUri(IList<KeyValuePair<Type, object>> transformersSourceValues, UriParts uriParts)
         {
-            var relativeUri = string.Join("/", routeValues.EmptyIfNull().Select(item => GetOrTransform(item, transformersSourceValues)).Select(item => item.ToUrlString()));
+            var relativeUri = string.Join("/", uriParts.RouteValues.EmptyIfNull().Select(item => GetOrTransform(item, transformersSourceValues)).Select(item => item.ToUrlString()));
 
-            var uriBuilder = new UriBuilder(new Uri(uri, relativeUri));
+            var uriBuilder = new UriBuilder(new Uri(uriParts.BaseUri, relativeUri));
 
             var queryString = 
-                SpotifyObjectHelpers.GetPropertyBag(queryStringParameters)
+                SpotifyObjectHelpers.GetPropertyBag(uriParts.QueryStringParameters)
                 .Select(item => new KeyValuePair<string, object>(item.Key, GetOrTransform(item.Value, transformersSourceValues)))
                 .GetQueryString();
 
@@ -198,23 +178,32 @@ namespace FluentSpotifyApi.Core.Client
         }
 
         private Task<T> SendInternalAsync<T>(
-            Uri uri, 
-            HttpMethod httpMethod, 
-            object queryStringParameters, 
-            Func<CancellationToken, Task<HttpContent>> requestContentProvider, 
+            UriParts uriParts, 
+            HttpMethod httpMethod,             
             IEnumerable<KeyValuePair<string, string>> requestHeaders,
-            CancellationToken cancellationToken,
-            object[] routeValues)
+            Func<CancellationToken, Task<HttpContent>> requestContentProvider,
+            CancellationToken cancellationToken)
         {
             return this.httpClientWrapper.SendAsync(
                 new HttpRequest<T>(
-                    new TransformableUriBuilder(transformersSourceValues => GetCompleteUri(transformersSourceValues, uri, queryStringParameters, routeValues)),
+                    new TransformableUriBuilder(transformersSourceValues => GetCompleteUri(transformersSourceValues, uriParts)),
                     httpMethod,
                     requestHeaders.EmptyIfNull().ToList().AsReadOnly(),
                     requestContentProvider,
-                    async (content, innerCt) =>
+                    async (response, innerCt) =>
                     {
-                        using (var stream = await content.ReadAsStreamAsync().ConfigureAwait(false))
+                        var matchingAttribute = typeof(T).GetTypeInfo().GetCustomAttributes().OfType<HttpStatusCodeToExceptionAttribute>().FirstOrDefault(item => item.StatusCode == response.StatusCode);
+                        if (matchingAttribute != null)
+                        {
+                            throw (Exception)Activator.CreateInstance(matchingAttribute.ExceptionType);
+                        }
+
+                        if (response.Content == null)
+                        {
+                            return default(T);
+                        }
+
+                        using (var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
                         using (var streamReader = new StreamReader(stream))
                         using (var reader = new JsonTextReader(streamReader))
                         {

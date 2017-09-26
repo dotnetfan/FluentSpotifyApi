@@ -6,6 +6,7 @@ using FluentSpotifyApi.Builder.Me.Following.Playlist;
 using FluentSpotifyApi.Builder.Me.Library;
 using FluentSpotifyApi.Builder.Me.Personalization.RecentlyPlayed;
 using FluentSpotifyApi.Builder.Me.Personalization.Top;
+using FluentSpotifyApi.Builder.Me.Player;
 using FluentSpotifyApi.Builder.User;
 using FluentSpotifyApi.Builder.User.Playlists;
 using FluentSpotifyApi.Core.Model;
@@ -13,7 +14,7 @@ using FluentSpotifyApi.Model;
 
 namespace FluentSpotifyApi.Builder.Me
 {
-    internal class Builder : BuilderBase, IMeBuilder, ILibraryBuilder, IPersonalizationBuilder, IFollowingBuilder
+    internal class Builder : BuilderBase, IMeBuilder, ILibraryBuilder, IPersonalizationBuilder, IFollowingBuilder, IPlayerBuilder
     {
         public Builder(ContextData contextData) : base(contextData, "me")
         {
@@ -25,6 +26,8 @@ namespace FluentSpotifyApi.Builder.Me
 
         IFollowingBuilder IMeBuilder.Following => this;
 
+        IPlayerBuilder IMeBuilder.Player => this;
+
         ITopBuilder<FullArtist> IPersonalizationBuilder.TopArtists => Personalization.Top.Factory.CreateTopArtistsBuilder(this.ContextData, this.RouteValuesPrefix);
 
         ITopBuilder<FullTrack> IPersonalizationBuilder.TopTracks => Personalization.Top.Factory.CreateTopTracksBuilder(this.ContextData, this.RouteValuesPrefix);
@@ -33,6 +36,8 @@ namespace FluentSpotifyApi.Builder.Me
             new Personalization.RecentlyPlayed.RecentlyPlayedTracksBuilder(this.ContextData, this.RouteValuesPrefix);
 
         IPlaylistsBuilder IMeBuilder.Playlists => new UserBuilder(ContextData).Playlists;
+
+        IDevicesBuilder IPlayerBuilder.Devices => Player.Factory.CreateDevicesBuilder(this.ContextData, this.RouteValuesPrefix);
 
         IGetLibraryEntitiesBuilder<SavedAlbum> ILibraryBuilder.Albums()
         {
@@ -79,9 +84,19 @@ namespace FluentSpotifyApi.Builder.Me
             return this.GetAsync<PrivateUser>(cancellationToken);
         }
 
-        public IPlaylistBuilder Playlist(string id)
+        IPlaylistBuilder IMeBuilder.Playlist(string id)
         {
             return new UserBuilder(ContextData).Playlist(id);
+        }
+
+        IActiveDevicePlaybackBuilder IPlayerBuilder.Playback()
+        {
+            return Player.Factory.CreateActiveDevicePlaybackBuilder(this.ContextData, this.RouteValuesPrefix);
+        }
+
+        IDevicePlaybackBuilder IPlayerBuilder.Playback(string deviceId)
+        {
+            return Player.Factory.CreateDevicePlaybackBuilder(this.ContextData, this.RouteValuesPrefix, deviceId);
         }
     }
 }

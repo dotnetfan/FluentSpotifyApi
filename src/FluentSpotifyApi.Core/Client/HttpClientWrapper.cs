@@ -56,19 +56,12 @@ namespace FluentSpotifyApi.Core.Client
 
                     using (var response = await this.httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false))
                     {
-                        TResult result = default(TResult);
-
                         await response.EnsureSuccessStatusCodeAsync().ConfigureAwait(false);
-                        if (response.Content != null)
-                        {
-                            result = await httpRequest.ResponseProcessor(response.Content, cancellationToken).ConfigureAwait(false);
-                        }
-
-                        return result;
+                        return await httpRequest.ResponseProcessor(response, cancellationToken).ConfigureAwait(false);
                     }
                 }
             }
-            catch (Exception e) when (!(e is SpotifyHttpResponseWithErrorCodeException))
+            catch (Exception e) when (!(e is SpotifyServiceException))
             {
                 if (e is OperationCanceledException operationCanceledException)
                 {

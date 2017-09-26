@@ -5,7 +5,7 @@ using FluentSpotifyApi.Model;
 namespace FluentSpotifyApi.Builder.Me
 {
     /// <summary>
-    /// Gets builder for "me/albums" and "me/tracks" endpoints.
+    /// The builder for "me/albums" and "me/tracks" endpoints.
     /// These endpoints are used for retrieving information about, and managing, tracks and albums 
     /// that the current user has saved in their “Your Music” library.
     /// </summary>

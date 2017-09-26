@@ -16,26 +16,26 @@ namespace FluentSpotifyApi.Builder.User.Playlists.Tracks
 
         public Task<PlaylistSnapshot> AddAsync(int? position, CancellationToken cancellationToken)
         {
-            return this.SendAsync<PlaylistSnapshot, TrackUrls>(
+            return this.SendAsync<PlaylistSnapshot, TrackUris>(
                 HttpMethod.Post,
-                new TrackUrls { Uris = this.Sequence.Select(item => GetTrackUrl(item)).ToArray() },
+                new TrackUris { Uris = this.Sequence.Select(item => SpotifyUri.ForTrack(item)).ToArray() },
                 cancellationToken,
                 optionalQueryStringParameters: new { position });
         }
 
         public Task<PlaylistSnapshot> RemoveAsync(CancellationToken cancellationToken)
         {
-            return this.SendAsync<PlaylistSnapshot, TrackUrlWithPositions>(
+            return this.SendAsync<PlaylistSnapshot, TrackUriWithPositions>(
                 HttpMethod.Delete,
-                new TrackUrlWithPositions { Tracks = this.Sequence.Select(item => new TrackUrlWithPosition { Uri = GetTrackUrl(item) }).ToArray() },
+                new TrackUriWithPositions { Tracks = this.Sequence.Select(item => new TrackUriWithPosition { Uri = SpotifyUri.ForTrack(item) }).ToArray() },
                 cancellationToken);
         }
 
         public Task<PlaylistSnapshot> ReplaceAsync(CancellationToken cancellationToken)
         {
-            return this.SendAsync<PlaylistSnapshot, TrackUrls>(
+            return this.SendAsync<PlaylistSnapshot, TrackUris>(
                 HttpMethod.Put,
-                new TrackUrls { Uris = this.Sequence.Select(item => GetTrackUrl(item)).ToArray() }, 
+                new TrackUris { Uris = this.Sequence.Select(item => SpotifyUri.ForTrack(item)).ToArray() }, 
                 cancellationToken);
         }
     }

@@ -45,13 +45,14 @@ namespace FluentSpotifyApi.AuthorizationFlows.UnitTests.ClientCredentials
 
             this.AuthorizationFlowsHttpClientMock
                 .SetupSequence(x => x.SendAsync<AccessTokenDto>(
-                    this.Options.TokenEndpoint,
-                    HttpMethod.Post,                    
-                    null,
+                    It.Is<UriParts>(item => 
+                        item.BaseUri == this.Options.TokenEndpoint && 
+                        item.QueryStringParameters == null &&
+                        item.RouteValues == null),
+                    HttpMethod.Post,
+                    It.Is<IEnumerable<KeyValuePair<string, string>>>((IEnumerable<KeyValuePair<string, string>> item) => item.Single().Equals(new KeyValuePair<string, string>("Authorization", $"Basic {Convert.ToBase64String(Encoding.UTF8.GetBytes($"{this.Options.ClientId}:{this.Options.ClientSecret}"))}"))),
                     It.Is<object>(item => SpotifyObjectHelpers.GetPropertyBag(item).Single().Equals(new KeyValuePair<string, object>("grant_type", "client_credentials"))),
-                    It.Is<IEnumerable<KeyValuePair<string, string>>>(item => item.Single().Equals(new KeyValuePair<string, string>("Authorization", $"Basic {Convert.ToBase64String(Encoding.UTF8.GetBytes($"{this.Options.ClientId}:{this.Options.ClientSecret}"))}"))),
-                    It.IsAny<CancellationToken>(),
-                    It.Is<object[]>(item => item.Length == 0)))
+                    It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(accessTokenDto1))
                 .Returns(Task.FromResult(accessTokenDto2))
                 .Returns(Task.FromResult(accessTokenDto3));
@@ -102,13 +103,14 @@ namespace FluentSpotifyApi.AuthorizationFlows.UnitTests.ClientCredentials
 
             this.AuthorizationFlowsHttpClientMock
                 .SetupSequence(x => x.SendAsync<AccessTokenDto>(
-                    this.Options.TokenEndpoint,
+                    It.Is<UriParts>(item =>
+                        item.BaseUri == this.Options.TokenEndpoint &&
+                        item.QueryStringParameters == null &&
+                        item.RouteValues == null),
                     HttpMethod.Post,
-                    null,
+                    It.Is<IEnumerable<KeyValuePair<string, string>>>((IEnumerable<KeyValuePair<string, string>> item) => item.Single().Equals(new KeyValuePair<string, string>("Authorization", $"Basic {Convert.ToBase64String(Encoding.UTF8.GetBytes($"{this.Options.ClientId}:{this.Options.ClientSecret}"))}"))),
                     It.Is<object>(item => SpotifyObjectHelpers.GetPropertyBag(item).Single().Equals(new KeyValuePair<string, object>("grant_type", "client_credentials"))),
-                    It.Is<IEnumerable<KeyValuePair<string, string>>>(item => item.Single().Equals(new KeyValuePair<string, string>("Authorization", $"Basic {Convert.ToBase64String(Encoding.UTF8.GetBytes($"{this.Options.ClientId}:{this.Options.ClientSecret}"))}"))),
-                    It.IsAny<CancellationToken>(),
-                    It.Is<object[]>(item => item.Length == 0)))
+                    It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(accessTokenDto1))
                 .Throws(new SpotifyHttpResponseWithErrorCodeException(System.Net.HttpStatusCode.ServiceUnavailable, null, string.Empty))
                 .Returns(Task.FromResult(accessTokenDto2));

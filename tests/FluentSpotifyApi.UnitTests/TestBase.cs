@@ -97,22 +97,20 @@ namespace FluentSpotifyApi.UnitTests
 
             this.SpotifyHttpClientMock
                 .Setup(x => x.SendAsync<T>(
-                    It.IsAny<Uri>(),
-                    httpMethod,                    
-                    It.IsAny<object>(),
-                    It.IsAny<object>(),
+                    It.IsAny<Core.Client.UriParts>(),
+                    httpMethod,
                     It.IsAny<IEnumerable<KeyValuePair<string, string>>>(),
-                    It.IsAny<CancellationToken>(),
-                    It.IsAny<object[]>()))
-                .Returns((Func<Uri, HttpMethod, object, object, IEnumerable<KeyValuePair<string, string>>, CancellationToken, object[], Task<T>>)((uri, innerHttpMehod, queryParameters, requestBodyParameters, requestHeaders, cancellationToken, routeValues) =>
+                    It.IsAny<object>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns((Func<Core.Client.UriParts, HttpMethod, IEnumerable<KeyValuePair<string, string>>, object, CancellationToken, Task<T>>)((uriParts, innerHttpMehod, requestHeaders, requestBodyParameters, cancellationToken) =>
                 {
                     var result = factory == null ? (T)Activator.CreateInstance(typeof(T)) : factory(i++);
 
                     mockResults.Add(new MockResult<T>()
                     {
-                        QueryParameters = ProcessQueryStringParameters(SpotifyObjectHelpers.GetPropertyBag(queryParameters)).Select(item => (item.Key, item.Value)).ToList(),
-                        RouteValues = ProcessRouteValues(routeValues),
-                        BodyParameters = SpotifyObjectHelpers.GetPropertyBag(requestBodyParameters).Select(item => (item.Key, item.Value)).ToList(),
+                        QueryParameters = ProcessQueryStringParameters(SpotifyObjectHelpers.GetPropertyBag(uriParts.QueryStringParameters)).Select((KeyValuePair<string, object> item) => (item.Key, item.Value)).ToList(),
+                        RouteValues = ProcessRouteValues(uriParts.RouteValues),
+                        BodyParameters = SpotifyObjectHelpers.GetPropertyBag(requestBodyParameters).Select((KeyValuePair<string, object> item) => (item.Key, item.Value)).ToList(),
                         Result = result
                     });
 
@@ -121,21 +119,19 @@ namespace FluentSpotifyApi.UnitTests
 
             this.SpotifyHttpClientMock
                 .Setup(x => x.SendWithJsonBodyAsync<T, object>(
-                    It.IsAny<Uri>(),
+                    It.IsAny<Core.Client.UriParts>(),
                     httpMethod,
-                    It.IsAny<object>(),
-                    It.IsAny<object>(),
                     It.IsAny<IEnumerable<KeyValuePair<string, string>>>(),
-                    It.IsAny<CancellationToken>(),
-                    It.IsAny<object[]>()))
-                .Returns((Func<Uri, HttpMethod, object, object, IEnumerable<KeyValuePair<string, string>>, CancellationToken, object[], Task<T>>)((uri, innerHttpMehod, queryParameters, requestBody, requestHeaders, cancellationToken, routeValues) =>
+                    It.IsAny<object>(),
+                    It.IsAny<CancellationToken>()))
+                .Returns((Func<Core.Client.UriParts, HttpMethod, IEnumerable<KeyValuePair<string, string>>, object, CancellationToken, Task<T>>)((uri, innerHttpMehod, requestHeaders, requestBody, cancellationToken) =>
                 {
                     var result = factory == null ? (T)Activator.CreateInstance(typeof(T)) : factory(i++);
 
                     mockResults.Add(new MockResult<T>()
                     {
-                        QueryParameters = ProcessQueryStringParameters(SpotifyObjectHelpers.GetPropertyBag(queryParameters)).Select(item => (item.Key, item.Value)).ToList(),
-                        RouteValues = ProcessRouteValues(routeValues),
+                        QueryParameters = ProcessQueryStringParameters(SpotifyObjectHelpers.GetPropertyBag(uri.QueryStringParameters)).Select((KeyValuePair<string, object> item) => (item.Key, item.Value)).ToList(),
+                        RouteValues = ProcessRouteValues(uri.RouteValues),
                         RequestPayload = JObject.Parse(JsonConvert.SerializeObject(requestBody)),
                         Result = result
                     });
@@ -145,22 +141,20 @@ namespace FluentSpotifyApi.UnitTests
 
             this.SpotifyHttpClientMock
                 .Setup(x => x.SendWithStreamBodyAsync<T>(
-                    It.IsAny<Uri>(),
+                    It.IsAny<Core.Client.UriParts>(),
                     httpMethod,
-                    It.IsAny<object>(),
+                    It.IsAny<IEnumerable<KeyValuePair<string, string>>>(),
                     It.IsAny<Func<CancellationToken, Task<Stream>>>(),
                     It.IsAny<string>(),
-                    It.IsAny<IEnumerable<KeyValuePair<string, string>>>(),
-                    It.IsAny<CancellationToken>(),
-                    It.IsAny<object[]>()))
-                .Returns((Func<Uri, HttpMethod, object, Func<CancellationToken, Task<Stream>>, string, IEnumerable<KeyValuePair<string, string>>, CancellationToken, object[], Task<T>>)((uri, innerHttpMehod, queryParameters, streamProvider, streamContentType, requestHeaders, cancellationToken, routeValues) =>
+                    It.IsAny<CancellationToken>()))
+                .Returns((Func<Core.Client.UriParts, HttpMethod, IEnumerable<KeyValuePair<string, string>>, Func<CancellationToken, Task<Stream>>, string, CancellationToken, Task<T>>)((uri, innerHttpMehod, requestHeaders, streamProvider, streamContentType, cancellationToken) =>
                 {
                     var result = factory == null ? (T)Activator.CreateInstance(typeof(T)) : factory(i++);
 
                     mockResults.Add(new MockResult<T>()
                     {
-                        QueryParameters = ProcessQueryStringParameters(SpotifyObjectHelpers.GetPropertyBag(queryParameters)).Select(item => (item.Key, item.Value)).ToList(),
-                        RouteValues = ProcessRouteValues(routeValues),
+                        QueryParameters = ProcessQueryStringParameters(SpotifyObjectHelpers.GetPropertyBag(uri.QueryStringParameters)).Select((KeyValuePair<string, object> item) => (item.Key, item.Value)).ToList(),
+                        RouteValues = ProcessRouteValues(uri.RouteValues),
                         Result = result
                     });
 
@@ -170,7 +164,7 @@ namespace FluentSpotifyApi.UnitTests
             return mockResults;
         }
 
-        private static IList<object> ProcessRouteValues(IList<object> routeValues)
+        private static IList<object> ProcessRouteValues(IEnumerable<object> routeValues)
         {
             return routeValues.EmptyIfNull().Select(item => (item is ITransformer transformer) && transformer.SourceType == typeof(IUser) ? UserId : item).ToList();
         }

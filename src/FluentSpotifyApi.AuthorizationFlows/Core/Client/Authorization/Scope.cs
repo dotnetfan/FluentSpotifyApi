@@ -95,6 +95,24 @@ namespace FluentSpotifyApi.AuthorizationFlows.Core.Client.Authorization
         /// The user-read-recently-played permission.
         /// </summary>
         [Description("user-read-recently-played")]
-        UserReadRecentlyPlayed,        
+        UserReadRecentlyPlayed,
+
+        /// <summary>
+        /// The user-read-playback-state permission.
+        /// </summary>
+        [Description("user-read-playback-state")]
+        UserReadPlaybackState,
+
+        /// <summary>
+        /// The user-modify-playback-state permission.
+        /// </summary>
+        [Description("user-modify-playback-state")]
+        UserModifyPlaybackState,
+
+        /// <summary>
+        /// The user-read-currently-playing permission.
+        /// </summary>
+        [Description("user-read-currently-playing")]
+        UserReadCurrentlyPlaying,        
     }
 }

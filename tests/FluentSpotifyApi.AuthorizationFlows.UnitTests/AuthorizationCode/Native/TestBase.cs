@@ -173,13 +173,11 @@ namespace FluentSpotifyApi.AuthorizationFlows.UnitTests.AuthorizationCode.Native
         {
             return this.AuthorizationFlowsHttpClientMock
                 .SetupSequence(x => x.SendAsync<PrivateUser>(
-                    It.Is<Uri>(item => item == this.UserClientOptions.UserInformationEndpoint),
-                    HttpMethod.Get,                    
+                    It.Is<UriParts>(item => item.BaseUri == this.UserClientOptions.UserInformationEndpoint && item.QueryStringParameters == null && item.RouteValues == null),
+                    HttpMethod.Get,
+                    It.Is<IEnumerable<KeyValuePair<string, string>>>((IEnumerable<KeyValuePair<string, string>> item) => item.Single().Equals(new KeyValuePair<string, string>("Authorization", $"Bearer {accessToken}"))),
                     null,
-                    null,
-                    It.Is<IEnumerable<KeyValuePair<string, string>>>(item => item.Single().Equals(new KeyValuePair<string, string>("Authorization", $"Bearer {accessToken}"))),
-                    It.IsAny<CancellationToken>(),
-                    It.Is<object[]>(item => !item.Any())));
+                    It.IsAny<CancellationToken>()));
         }
 
         protected ISetupSequentialResult<Task<FullPlaylist>> MockGetPlaylistHttpClientWrapper(string userId, string playlistId, string accessToken)

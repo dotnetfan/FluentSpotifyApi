@@ -20,14 +20,12 @@ namespace FluentSpotifyApi.Builder
             CancellationToken cancellationToken, 
             object queryStringParameters = null,
             object optionalQueryStringParameters = null, 
-            IEnumerable<KeyValuePair<string, string>> requestHeaders = null, 
-            params object[] additionalRouteValues)
+            IEnumerable<object> additionalRouteValues = null)
         {
             return this.GetAsync<T>(
                 cancellationToken,
                 queryStringParameters: new { ids = string.Join(",", this.Sequence), originalParameters = queryStringParameters },
                 optionalQueryStringParameters: optionalQueryStringParameters,
-                requestHeaders: requestHeaders,
                 additionalRouteValues: additionalRouteValues);
         }
     }

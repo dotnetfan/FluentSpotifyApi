@@ -100,15 +100,17 @@ namespace FluentSpotifyApi.AuthorizationFlows.AspNetCore.UnitTests.Authorization
         {
             return this.AuthorizationFlowsHttpClientMock
                 .SetupSequence(x => x.SendAsync<AccessTokenDto>(
-                    new Uri(this.tokenEndpoint),
+                    It.Is<UriParts>(item => 
+                        item.BaseUri == new Uri(this.tokenEndpoint) &&
+                        item.QueryStringParameters == null &&
+                        item.RouteValues == null),
                     HttpMethod.Post,
-                    null,
-                    It.Is<object>(item => SpotifyObjectHelpers.GetPropertyBag(item).Count() == 2 &&
+                    It.Is<IEnumerable<KeyValuePair<string, string>>>((IEnumerable<KeyValuePair<string, string>> item) => item.Single().Equals(new KeyValuePair<string, string>("Authorization", $"Basic {Convert.ToBase64String(Encoding.UTF8.GetBytes($"{ClientId}:{ClientSecret}"))}"))),
+                    It.Is<object>(item =>
+                        SpotifyObjectHelpers.GetPropertyBag(item).Count() == 2 &&
                         SpotifyObjectHelpers.GetPropertyBag(item).Contains(new KeyValuePair<string, object>("grant_type", "refresh_token")) &&
                         SpotifyObjectHelpers.GetPropertyBag(item).Contains(new KeyValuePair<string, object>("refresh_token", refereshToken))),
-                    It.Is<IEnumerable<KeyValuePair<string, string>>>(item => item.Single().Equals(new KeyValuePair<string, string>("Authorization", $"Basic {Convert.ToBase64String(Encoding.UTF8.GetBytes($"{ClientId}:{ClientSecret}"))}"))),
-                    It.IsAny<CancellationToken>(),
-                    It.Is<object[]>(item => item.Length == 0)));
+                    It.IsAny<CancellationToken>()));
         }
 
         protected ISetupSequentialResult<Task<FullPlaylist>> MockGetPlaylistHttpClientWrapper(string userId, string playlistId, string accessToken)

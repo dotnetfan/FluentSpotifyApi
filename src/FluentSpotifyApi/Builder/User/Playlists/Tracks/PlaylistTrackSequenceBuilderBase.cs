@@ -10,27 +10,22 @@ namespace FluentSpotifyApi.Builder.User.Playlists.Tracks
         {
         }
 
-        protected static string GetTrackUrl(string url)
-        {
-            return $"spotify:track:{url}";
-        }
-
-        protected class TrackUrls
+        protected class TrackUris
         {
             [JsonProperty(PropertyName = "uris")]
             public string[] Uris { get; set; }
         }
 
-        protected class TrackUrlWithPositions
+        protected class TrackUriWithPositions
         {
             [JsonProperty(PropertyName = "tracks")]
-            public TrackUrlWithPosition[] Tracks { get; set; }
+            public TrackUriWithPosition[] Tracks { get; set; }
 
             [JsonProperty(PropertyName = "snapshot_id", NullValueHandling = NullValueHandling.Ignore)]
             public string SnapshotId { get; set; }
         }
 
-        protected class TrackUrlWithPosition
+        protected class TrackUriWithPosition
         {
             [JsonProperty(PropertyName = "uri")]
             public string Uri { get; set; }

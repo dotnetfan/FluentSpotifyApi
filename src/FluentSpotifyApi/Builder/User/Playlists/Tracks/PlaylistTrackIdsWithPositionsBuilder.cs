@@ -22,11 +22,11 @@ namespace FluentSpotifyApi.Builder.User.Playlists.Tracks
 
         public Task<PlaylistSnapshot> RemoveAsync(string snapshotId, CancellationToken cancellationToken)
         {
-            return this.SendAsync<PlaylistSnapshot, TrackUrlWithPositions>(
+            return this.SendAsync<PlaylistSnapshot, TrackUriWithPositions>(
                 HttpMethod.Delete,
-                new TrackUrlWithPositions
+                new TrackUriWithPositions
                 {
-                    Tracks = this.Sequence.Select(item => new TrackUrlWithPosition { Uri = GetTrackUrl(item.Id), Positions = item.Positions }).ToArray(),
+                    Tracks = this.Sequence.Select(item => new TrackUriWithPosition { Uri = SpotifyUri.ForTrack(item.Id), Positions = item.Positions }).ToArray(),
                     SnapshotId = snapshotId
                 },
                 cancellationToken);

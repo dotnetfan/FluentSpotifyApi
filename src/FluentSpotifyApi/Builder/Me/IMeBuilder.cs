@@ -30,22 +30,26 @@ namespace FluentSpotifyApi.Builder.Me
         IFollowingBuilder Following { get; }
 
         /// <summary>
-        /// Gets builder for users/{myUserId}/playlists endpoint.
+        /// Gets builder for "users/{myUserId}/playlists" endpoint.
         /// </summary>
         IPlaylistsBuilder Playlists { get; }
 
         /// <summary>
-        /// Gets builder for users/{myUserId}/playlists/{id} endpoint.
+        /// Gets builder for "me/player" endpoint.
+        /// This endpoint is used for controlling Spotify devices.
+        /// </summary>
+        IPlayerBuilder Player { get; }
+
+        /// <summary>
+        /// Gets builder for "users/{myUserId}/playlists/{id}" endpoint.
         /// </summary>
         /// <param name="id">The identifier.</param>
-        /// <returns>The builder for users/{myUserId}/playlists/{id} endpoint.</returns>
         IPlaylistBuilder Playlist(string id);
 
         /// <summary>
         /// Get detailed profile information about the current user (including the current user’s username).
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>
-        /// <returns></returns>
         Task<PrivateUser> GetAsync(CancellationToken cancellationToken = default(CancellationToken));
     }
 }

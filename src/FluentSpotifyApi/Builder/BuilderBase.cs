@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentSpotifyApi.Core.Client;
 using FluentSpotifyApi.Core.Internal;
 using FluentSpotifyApi.Core.Internal.Extensions;
 using FluentSpotifyApi.Core.Model;
@@ -33,38 +34,33 @@ namespace FluentSpotifyApi.Builder
             this.RouteValuesPrefix = routeValuesPrefix.EmptyIfNull().Concat(endpointName.Yield()).Concat(routeValuesSuffix.EmptyIfNull()).ToArray();
         }
 
-        protected Task<T> GetAsync<T>(
+        protected Task<TResult> GetAsync<TResult>(
             CancellationToken cancellationToken, 
             object queryStringParameters = null, 
             object optionalQueryStringParameters = null, 
-            IEnumerable<KeyValuePair<string, string>> requestHeaders = null,
-            params object[] additionalRouteValues)
+            IEnumerable<object> additionalRouteValues = null)
         {
-            return this.SendAsync<T>(
+            return this.SendAsync<TResult>(
                 HttpMethod.Get, 
                 cancellationToken, 
                 queryStringParameters, 
                 optionalQueryStringParameters, 
-                requestHeaders, 
                 additionalRouteValues);
         }
 
-        protected Task<T> SendAsync<T>(
+        protected Task<TResult> SendAsync<TResult>(
             HttpMethod httpMethod, 
             CancellationToken cancellationToken, 
             object queryStringParameters = null, 
             object optionalQueryStringParameters = null,
-            IEnumerable<KeyValuePair<string, string>> requestHeaders = null, 
-            params object[] additionalRouteValues)
+            IEnumerable<object> additionalRouteValues = null)
         {
-            return this.ContextData.SpotifyHttpClient.SendAsync<T>(
-                this.ContextData.FluentSpotifyClientOptionsProvider.Get().WebApiEndpoint,
-                httpMethod,
-                CombineParameters(queryStringParameters, optionalQueryStringParameters),
-                null, 
-                requestHeaders,
-                cancellationToken,
-                this.CombineRouteValues(additionalRouteValues));
+            return this.ContextData.SpotifyHttpClient.SendAsync<TResult>(
+                this.GetUriParts(queryStringParameters, optionalQueryStringParameters, additionalRouteValues),
+                httpMethod,                
+                null,
+                null,
+                cancellationToken);
         }
 
         protected Task<TResult> SendAsync<TResult, TRequestBody>(
@@ -73,38 +69,32 @@ namespace FluentSpotifyApi.Builder
             CancellationToken cancellationToken, 
             object queryStringParameters = null, 
             object optionalQueryStringParameters = null, 
-            IEnumerable<KeyValuePair<string, string>> requestHeaders = null, 
-            params object[] additionalRouteValues)
+            IEnumerable<object> additionalRouteValues = null)
         {
             return this.ContextData.SpotifyHttpClient.SendWithJsonBodyAsync<TResult, TRequestBody>(
-                this.ContextData.FluentSpotifyClientOptionsProvider.Get().WebApiEndpoint,
-                httpMethod,                 
-                CombineParameters(queryStringParameters, optionalQueryStringParameters),
+                this.GetUriParts(queryStringParameters, optionalQueryStringParameters, additionalRouteValues),                
+                httpMethod,                                                
+                null,
                 requestBody,
-                requestHeaders,
-                cancellationToken,
-                this.CombineRouteValues(additionalRouteValues));
+                cancellationToken);
         }
 
-        protected Task<T> SendAsync<T>(
+        protected Task<TResult> SendAsync<TResult>(
             HttpMethod httpMethod,
             Func<CancellationToken, Task<Stream>> streamProvider,
             string streamContentType,
             CancellationToken cancellationToken,
             object queryStringParameters = null,
             object optionalQueryStringParameters = null,
-            IEnumerable<KeyValuePair<string, string>> requestHeaders = null,
-            params object[] additionalRouteValues)
+            IEnumerable<object> additionalRouteValues = null)
         {
-            return this.ContextData.SpotifyHttpClient.SendWithStreamBodyAsync<T>(
-                this.ContextData.FluentSpotifyClientOptionsProvider.Get().WebApiEndpoint,
+            return this.ContextData.SpotifyHttpClient.SendWithStreamBodyAsync<TResult>(
+                this.GetUriParts(queryStringParameters, optionalQueryStringParameters, additionalRouteValues),
                 httpMethod,
-                CombineParameters(queryStringParameters, optionalQueryStringParameters),
+                null,
                 streamProvider,
                 streamContentType,
-                requestHeaders,
-                cancellationToken,
-                this.CombineRouteValues(additionalRouteValues));
+                cancellationToken);
         }
 
         private static object CombineParameters(object parameters, object optionalParameters)
@@ -121,9 +111,19 @@ namespace FluentSpotifyApi.Builder
             }
         }
 
-        private object[] CombineRouteValues(object[] additionalRouteValues)
+        private object[] CombineRouteValues(IEnumerable<object> additionalRouteValues)
         {
             return this.RouteValuesPrefix.Concat(additionalRouteValues.EmptyIfNull()).ToArray();
+        }
+
+        private UriParts GetUriParts(object queryStringParameters, object optionalQueryStringParameters, IEnumerable<object> additionalRouteValues)
+        {
+            return new UriParts
+            {
+                BaseUri = this.ContextData.FluentSpotifyClientOptionsProvider.Get().WebApiEndpoint,
+                QueryStringParameters = CombineParameters(queryStringParameters, optionalQueryStringParameters),
+                RouteValues = this.CombineRouteValues(additionalRouteValues),
+            };
         }
     }
 }

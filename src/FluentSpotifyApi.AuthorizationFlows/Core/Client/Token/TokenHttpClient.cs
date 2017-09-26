@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentSpotifyApi.Core.Client;
 using FluentSpotifyApi.Core.Options;
 
 namespace FluentSpotifyApi.AuthorizationFlows.Core.Client.Token
@@ -40,11 +41,10 @@ namespace FluentSpotifyApi.AuthorizationFlows.Core.Client.Token
             var tokenClientOptions = this.tokenClientOptionsProvider.Get();
 
             return this.authorizationFlowsHttpClient.SendAsync<AuthorizationTokensDto>(
-                tokenClientOptions.TokenEndpoint,
-                HttpMethod.Post,
-                null,
-                new { grant_type = "authorization_code", code = authorizationCode, redirect_uri = redirectUrl },
+                new UriParts { BaseUri = tokenClientOptions.TokenEndpoint },
+                HttpMethod.Post,                
                 new[] { this.GetAuthorizationHeader(tokenClientOptions) },
+                new { grant_type = "authorization_code", code = authorizationCode, redirect_uri = redirectUrl },
                 cancellationToken);
         }
 
@@ -59,11 +59,10 @@ namespace FluentSpotifyApi.AuthorizationFlows.Core.Client.Token
             var tokenClientOptions = this.tokenClientOptionsProvider.Get();
 
             return this.authorizationFlowsHttpClient.SendAsync<AccessTokenDto>(
-                tokenClientOptions.TokenEndpoint,
-                HttpMethod.Post,
-                null,
-                new { grant_type = "refresh_token", refresh_token = refreshToken },
+                new UriParts { BaseUri = tokenClientOptions.TokenEndpoint },
+                HttpMethod.Post,                
                 new[] { this.GetAuthorizationHeader(tokenClientOptions) },
+                new { grant_type = "refresh_token", refresh_token = refreshToken },
                 cancellationToken);
         }
 
@@ -77,11 +76,10 @@ namespace FluentSpotifyApi.AuthorizationFlows.Core.Client.Token
             var tokenClientOptions = this.tokenClientOptionsProvider.Get();
 
             return this.authorizationFlowsHttpClient.SendAsync<AccessTokenDto>(
-                tokenClientOptions.TokenEndpoint,
-                HttpMethod.Post,
-                null,
-                new { grant_type = "client_credentials" },
+                new UriParts { BaseUri = tokenClientOptions.TokenEndpoint },
+                HttpMethod.Post,                
                 new[] { this.GetAuthorizationHeader(tokenClientOptions) },
+                new { grant_type = "client_credentials" },
                 cancellationToken);
         }
 
