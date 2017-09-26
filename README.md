@@ -167,6 +167,8 @@ The following exceptions can be thrown as a result of the communication error wi
       - `SpotifyUwpAuthorizationException` Contains additional ```WebAuthenticationStatus``` that is returned from the ```WebAuthenticationBroker```.
   - `SpotifyInvalidRefreshTokenException`
     The exception that is thrown when invalid refresh token is detected after [user has revoked access to your app.](https://developer.spotify.com/news-stories/2016/07/25/app-ready-token-revoke/)
+  - `SpotifyDeviceUnavailableException`
+    The exception that is thrown when a [Spotify device is temporarily unavailable during the Web API Connect request.](https://developer.spotify.com/web-api/working-with-connect/#202-and-retry)
 
 ### Retrying
 
