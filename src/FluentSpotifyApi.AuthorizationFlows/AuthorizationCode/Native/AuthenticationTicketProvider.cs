@@ -108,7 +108,7 @@ namespace FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Native
                 cancellationToken);
         }
 
-        public Task RestoreSessionAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public Task RestoreSessionAsync(CancellationToken cancellationToken)
         {
             return this.semaphore.ExecuteAsync(
                 async innerCt =>
@@ -124,7 +124,7 @@ namespace FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Native
                 cancellationToken);
         }
 
-        public Task<SessionState> GetSessionStateAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public Task<SessionState> GetSessionStateAsync(CancellationToken cancellationToken)
         {
             return this.semaphore.ExecuteAsync(
                 async innerCt =>
