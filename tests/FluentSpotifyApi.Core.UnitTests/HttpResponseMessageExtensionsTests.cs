@@ -28,7 +28,7 @@ namespace FluentSpotifyApi.Core.UnitTests
             var responseMessage = new HttpResponseMessage() { StatusCode = System.Net.HttpStatusCode.BadGateway, Content = new StringContent("exception test") };
 
             // Act + Assert
-            ((Func<Task>)(() => responseMessage.EnsureSuccessStatusCodeAsync())).ShouldThrow<SpotifyHttpResponseWithErrorCodeException>().WithMessage("exception test").Where(item => item.ErrorCode == System.Net.HttpStatusCode.BadGateway);
+            ((Func<Task>)(() => responseMessage.EnsureSuccessStatusCodeAsync())).ShouldThrowExactly<SpotifyHttpResponseWithErrorCodeException>().WithMessage("exception test").Where(item => item.ErrorCode == System.Net.HttpStatusCode.BadGateway);
         }
 
         [TestMethod]

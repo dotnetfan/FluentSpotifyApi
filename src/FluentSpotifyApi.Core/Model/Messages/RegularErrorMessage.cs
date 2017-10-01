@@ -13,7 +13,7 @@ namespace FluentSpotifyApi.Core.Model.Wrappers
         /// <value>
         /// The error.
         /// </value>
-        [JsonProperty(PropertyName = "error")]
+        [JsonProperty(PropertyName = "error", Required = Required.Always)]
         public RegularError Error { get; set; }
     }
 }

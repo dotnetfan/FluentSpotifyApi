@@ -13,7 +13,7 @@ namespace FluentSpotifyApi.Core.Model
         /// <value>
         /// The status.
         /// </value>
-        [JsonProperty(PropertyName = "status")]
+        [JsonProperty(PropertyName = "status", Required = Required.Always)]
         public int Status { get; set; }
 
         /// <summary>
@@ -22,7 +22,7 @@ namespace FluentSpotifyApi.Core.Model
         /// <value>
         /// The message.
         /// </value>
-        [JsonProperty(PropertyName = "message")]
+        [JsonProperty(PropertyName = "message", Required = Required.AllowNull)]
         public string Message { get; set; }
     }
 }

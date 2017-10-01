@@ -13,7 +13,7 @@ namespace FluentSpotifyApi.Core.Model
         /// <value>
         /// The error.
         /// </value>
-        [JsonProperty(PropertyName = "error")]
+        [JsonProperty(PropertyName = "error", Required = Required.AllowNull)]
         public string Error { get; set; }
 
         /// <summary>
@@ -22,7 +22,7 @@ namespace FluentSpotifyApi.Core.Model
         /// <value>
         /// The error description.
         /// </value>
-        [JsonProperty(PropertyName = "error_description")]
+        [JsonProperty(PropertyName = "error_description", Required = Required.AllowNull)]
         public string ErrorDescription { get; set; }
     }
 }

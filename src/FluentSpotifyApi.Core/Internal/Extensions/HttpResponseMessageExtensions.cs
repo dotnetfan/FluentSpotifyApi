@@ -4,44 +4,12 @@ using System.Threading.Tasks;
 using FluentSpotifyApi.Core.Exceptions;
 using FluentSpotifyApi.Core.Model;
 using FluentSpotifyApi.Core.Model.Wrappers;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Schema;
+using Newtonsoft.Json;
 
 namespace FluentSpotifyApi.Core.Internal.Extensions
 {
     internal static class HttpResponseMessageExtensions
     {
-        private const string RegularErrorWrapperSchemaString =
-            @"{
-                'definitions': {
-                    'errorDefinition': {
-                        'type': 'object',
-                        'properties': {
-                            'status': {'type':'integer'},  
-                            'message': {'type':'string'}
-                        },
-                    }
-                },
-
-              'type': 'object',
-              'properties': {
-                'error': { '$ref': '#/definitions/errorDefinition' },
-              },
-            }";
-
-        private const string AuthenticationErrorWrapperSchemaString =
-            @"{
-              'type': 'object',
-              'properties': {
-                    'error': {'type':'string'},  
-                    'error_description': {'type':'string'}              
-               },
-            }";
-
-        private static readonly JSchema RegularErrorWrapperSchema = JSchema.Parse(RegularErrorWrapperSchemaString);
-
-        private static readonly JSchema AuthenticationErrorWrapperSchema = JSchema.Parse(AuthenticationErrorWrapperSchemaString);
-
         public static async Task EnsureSuccessStatusCodeAsync(this HttpResponseMessage response)
         {
             if (response.IsSuccessStatusCode)
@@ -57,15 +25,15 @@ namespace FluentSpotifyApi.Core.Internal.Extensions
                 try
                 {
                     content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    var payload = JObject.Parse(content);
-                    if (payload.IsValid(RegularErrorWrapperSchema))
+
+                    try
                     {
-                        regularErrorMessage = payload.ToObject<RegularErrorMessage>();
+                        regularErrorMessage = JsonConvert.DeserializeObject<RegularErrorMessage>(content);
                     }
-                    else if (payload.IsValid(AuthenticationErrorWrapperSchema))
+                    catch (Exception)
                     {
-                        authenticationError = payload.ToObject<AuthenticationError>();
-                    }
+                        authenticationError = JsonConvert.DeserializeObject<AuthenticationError>(content);
+                    }                    
                 }
                 catch (Exception)
                 {
