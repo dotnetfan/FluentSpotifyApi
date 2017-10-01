@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Native
+﻿namespace FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Native
 {
     /// <summary>
     /// The session state

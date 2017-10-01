@@ -8,7 +8,6 @@ using FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Native;
 using FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Server.Extensions;
 using FluentSpotifyApi.AuthorizationFlows.Core.Client.Authorization;
 using FluentSpotifyApi.AuthorizationFlows.Core.Client.Token;
-using FluentSpotifyApi.AuthorizationFlows.UWP.AuthorizationCode;
 using FluentSpotifyApi.AuthorizationFlows.UWP.AuthorizationCode.Extensions;
 using FluentSpotifyApi.Core.Exceptions;
 using FluentSpotifyApi.Core.Extensions;
