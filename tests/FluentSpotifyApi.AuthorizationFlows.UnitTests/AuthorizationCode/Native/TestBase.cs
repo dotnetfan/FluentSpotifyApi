@@ -78,7 +78,6 @@ namespace FluentSpotifyApi.AuthorizationFlows.UnitTests.AuthorizationCode.Native
                     o.Scopes = new[] { Scope.PlaylistModifyPrivate, Scope.PlaylistReadPrivate };
                     o.DynamicScopes = new[] { "user-follow-read", "user-library-modify" };
                     o.AuthorizationEndpoint = new Uri("http://localhost/authorize");
-                    o.UnauthorizeEndpoint = new Uri("http://localhost/logout");
                     o.UserInformationEndpoint = new Uri("http://localhost/user");
                 })));
 
@@ -284,8 +283,6 @@ namespace FluentSpotifyApi.AuthorizationFlows.UnitTests.AuthorizationCode.Native
             public string ClientId { get; set; }
 
             public Uri AuthorizationEndpoint { get; set; }
-
-            public Uri UnauthorizeEndpoint { get; set; }
 
             public IList<Scope> Scopes { get; set; }
 
