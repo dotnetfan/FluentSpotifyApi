@@ -24,8 +24,8 @@ namespace FluentSpotifyApi.Core.UnitTests
             // Arrange
             var uri = new Uri("http://localhost");
             var httpMethod = HttpMethod.Get;
-            var queryStringParameters = new { key1 = "test value", key2 = "test 2" };
-            var requestBodyParameters = new { bodyKey1 = "body test value?", bodyKey2 = "test 2" };
+            var queryStringParameters = new { key2 = "test 2", key1 = "test value" };
+            var requestBodyParameters = new { bodyKey2 = "test 2", bodyKey1 = "body test value?" };
             var requestHeaders = new[] { new KeyValuePair<string, string>("Header1", "HeaderValue1"), new KeyValuePair<string, string>("Header2", "HeaderValue2") };
             var routeValues = new object[] { "test1&test2", 123 };
             var testResult = new TestResult { Test1 = 12, Test2 = 67 };
@@ -35,7 +35,10 @@ namespace FluentSpotifyApi.Core.UnitTests
                 .SendAsync(
                     It.Is<HttpRequest<TestResult>>(
                         item =>
-                            item.UriFromValuesBuilder.Build() == new Uri("http://localhost/test1%26test2/123?key1=test%20value&key2=test%202") &&  
+                            item.UriFromValuesBuilder.Build().Scheme == "http" &&
+                            item.UriFromValuesBuilder.Build().Host == "localhost" &&
+                            item.UriFromValuesBuilder.Build().AbsolutePath == "/test1%26test2/123" &&
+                            string.Join('&', item.UriFromValuesBuilder.Build().Query.Substring(1).Split('&', StringSplitOptions.None).OrderBy(param => param)) == "key1=test%20value&key2=test%202" &&  
                             item.HttpMethod == httpMethod),
                     It.IsAny<CancellationToken>()))
                 .Returns((Func<HttpRequest<TestResult>, CancellationToken, Task<TestResult>>)(async (h, c) =>
@@ -43,7 +46,7 @@ namespace FluentSpotifyApi.Core.UnitTests
                       h.RequestHeaders.Should().Equal(requestHeaders);
 
                       var requestContent = await h.RequestContentProvider(c);
-                      requestContent.Should().BeOfType<FormUrlEncodedContent>().Which.ReadAsStringAsync().Result.Should().Be("bodyKey1=body+test+value%3F&bodyKey2=test+2");
+                      string.Join('&', requestContent.Should().BeOfType<FormUrlEncodedContent>().Which.ReadAsStringAsync().Result.Split('&').OrderBy(param => param)).Should().Be("bodyKey1=body+test+value%3F&bodyKey2=test+2");
 
                       var stringContent = new StringContent(JsonConvert.SerializeObject(testResult));
                       return await h.ResponseProcessor(new HttpResponseMessage(System.Net.HttpStatusCode.OK) { Content = stringContent }, c);
@@ -67,7 +70,7 @@ namespace FluentSpotifyApi.Core.UnitTests
             // Arrange
             var uri = new Uri("http://localhost");
             var httpMethod = HttpMethod.Get;
-            var queryStringParameters = new { key1 = "test value", key2 = "test 2" };
+            var queryStringParameters = new { key2 = "test 2", key1 = "test value" };
             var requestBody = new Body { Body1 = "Test body", Body2 = 765 };
             var requestHeaders = new[] { new KeyValuePair<string, string>("Header1", "HeaderValue1"), new KeyValuePair<string, string>("Header2", "HeaderValue2") };
             var routeValues = new object[] { "test1&test2", 123 };
@@ -77,8 +80,11 @@ namespace FluentSpotifyApi.Core.UnitTests
             mock.Setup(x => x
                 .SendAsync(
                     It.Is<HttpRequest<TestResult>>(
-                        item => 
-                            item.UriFromValuesBuilder.Build() == new Uri("http://localhost/test1%26test2/123?key1=test%20value&key2=test%202") && 
+                        item =>
+                            item.UriFromValuesBuilder.Build().Scheme == "http" &&
+                            item.UriFromValuesBuilder.Build().Host == "localhost" &&
+                            item.UriFromValuesBuilder.Build().AbsolutePath == "/test1%26test2/123" &&
+                            string.Join('&', item.UriFromValuesBuilder.Build().Query.Substring(1).Split('&', StringSplitOptions.None).OrderBy(param => param)) == "key1=test%20value&key2=test%202" &&
                             item.HttpMethod == httpMethod),
                     It.IsAny<CancellationToken>()))
                 .Returns((Func<HttpRequest<TestResult>, CancellationToken, Task<TestResult>>)(async (h, c) =>
@@ -110,7 +116,7 @@ namespace FluentSpotifyApi.Core.UnitTests
             // Arrange
             var uri = new Uri("http://localhost");
             var httpMethod = HttpMethod.Get;
-            var queryStringParameters = new { key1 = "test value", key2 = "test 2" };
+            var queryStringParameters = new { key2 = "test 2", key1 = "test value" };
             var streamProvider = (Func<CancellationToken, Task<Stream>>)(ct => Task.FromResult<Stream>(new MemoryStream(Encoding.ASCII.GetBytes("test stream data"))));
             var streamContentType = "application/json";
             var expectedStreamResult = "dGVzdCBzdHJlYW0gZGF0YQ==";
@@ -123,7 +129,10 @@ namespace FluentSpotifyApi.Core.UnitTests
                 .SendAsync(
                     It.Is<HttpRequest<TestResult>>(
                         item =>
-                            item.UriFromValuesBuilder.Build() == new Uri("http://localhost/test1%26test2/123?key1=test%20value&key2=test%202") &&
+                            item.UriFromValuesBuilder.Build().Scheme == "http" &&
+                            item.UriFromValuesBuilder.Build().Host == "localhost" &&
+                            item.UriFromValuesBuilder.Build().AbsolutePath == "/test1%26test2/123" &&
+                            string.Join('&', item.UriFromValuesBuilder.Build().Query.Substring(1).Split('&', StringSplitOptions.None).OrderBy(param => param)) == "key1=test%20value&key2=test%202" &&
                             item.HttpMethod == httpMethod),
                     It.IsAny<CancellationToken>()))
                 .Returns((Func<HttpRequest<TestResult>, CancellationToken, Task<TestResult>>)(async (h, c) =>
