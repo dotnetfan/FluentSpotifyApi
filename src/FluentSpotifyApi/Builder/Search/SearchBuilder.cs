@@ -15,55 +15,50 @@ namespace FluentSpotifyApi.Builder.Search
         {
         }
 
-        public ISearchEntityBuilder<SimpleAlbumsPageMessage> Albums => new SearchEntitiesBuilder<SimpleAlbumsPageMessage>(this, Entity.Album);
+        public ISearchTypeBuilder<SimpleAlbumsPageMessage> Albums => new SearchTypeBuilder<SimpleAlbumsPageMessage>(this, Entity.Album);
 
-        public ISearchEntityBuilder<FullArtistsPageMessage> Artists => new SearchEntitiesBuilder<FullArtistsPageMessage>(this, Entity.Artist);
+        public ISearchTypeBuilder<FullArtistsPageMessage> Artists => new SearchTypeBuilder<FullArtistsPageMessage>(this, Entity.Artist);
 
-        public ISearchEntityBuilder<SimplePlaylistsPageMessage> Playlists => new SearchEntitiesBuilder<SimplePlaylistsPageMessage>(this, Entity.Playlist);
+        public ISearchTypeBuilder<SimplePlaylistsPageMessage> Playlists => new SearchTypeBuilder<SimplePlaylistsPageMessage>(this, Entity.Playlist);
 
-        public ISearchEntityBuilder<FullTracksPageMessage> Tracks => new SearchEntitiesBuilder<FullTracksPageMessage>(this, Entity.Track);
+        public ISearchTypeBuilder<FullTracksPageMessage> Tracks => new SearchTypeBuilder<FullTracksPageMessage>(this, Entity.Track);
 
-        public ISearchEntitiesBuilder Entities(params Entity[] entities)
+        public ISearchTypeBuilder<SearchResult> Entities(params Entity[] entities)
         {
-            return new SearchEntitiesBuilder<object>(this, entities);
+            return new SearchTypeBuilder<SearchResult>(this, entities);
         }
 
-        public ISearchEntitiesBuilder Entities()
+        public ISearchTypeBuilder<SearchResult> Entities()
         {
-            return new SearchEntitiesBuilder<object>(this);
+            return new SearchTypeBuilder<SearchResult>(this);
         }
 
-        private class SearchEntitiesBuilder<T> : ISearchEntitiesBuilder, ISearchEntityBuilder<T>
+        private class SearchTypeBuilder<T> : ISearchTypeBuilder<T>
         {
             private readonly SearchBuilder searchBuilder;
 
             private readonly IList<Entity> entities;
 
-            public SearchEntitiesBuilder(SearchBuilder searchBuilder) : this(searchBuilder, EnumExtensions.GetValues<Entity>())
+            public SearchTypeBuilder(SearchBuilder searchBuilder) : this(searchBuilder, EnumExtensions.GetValues<Entity>())
             {
             }
 
-            public SearchEntitiesBuilder(SearchBuilder searchBuilder, Entity entity) : this(searchBuilder, entity.Yield())
+            public SearchTypeBuilder(SearchBuilder searchBuilder, Entity entity) : this(searchBuilder, entity.Yield())
             {
             }
 
-            public SearchEntitiesBuilder(SearchBuilder searchBuilder, IEnumerable<Entity> entities)
+            public SearchTypeBuilder(SearchBuilder searchBuilder, IEnumerable<Entity> entities)
             {
                 this.searchBuilder = searchBuilder;
                 this.entities = entities.Distinct().ToList();
             }
 
-            public ISearchEntitiesQueryBuilder Matching(string query)
+            public ISearchTypeQueryBuilder<T> Matching(string query)
             {
-                return new SearchEntitiesQueryBuilder(this.searchBuilder, this.entities, query);
+                return new SearchTypeQueryBuilder(this.searchBuilder, this.entities, query);
             }
 
-            ISearchEntityQueryBuilder<T> ISearchEntityBuilder<T>.Matching(string query)
-            {
-                return new SearchEntitiesQueryBuilder(this.searchBuilder, this.entities, query);
-            }
-
-            private class SearchEntitiesQueryBuilder : ISearchEntitiesQueryBuilder, ISearchEntityQueryBuilder<T>
+            private class SearchTypeQueryBuilder : ISearchTypeQueryBuilder<T>
             {
                 private readonly SearchBuilder searchBuilder;
 
@@ -71,16 +66,20 @@ namespace FluentSpotifyApi.Builder.Search
 
                 private readonly string query;
 
-                public SearchEntitiesQueryBuilder(SearchBuilder searchBuilder, IList<Entity> entities, string query)
+                public SearchTypeQueryBuilder(SearchBuilder searchBuilder, IList<Entity> entities, string query)
                 {
                     this.searchBuilder = searchBuilder;
                     this.entities = entities;
                     this.query = query;
                 }
 
-                async Task<T> ISearchEntityQueryBuilder<T>.GetAsync(string market, int limit, int offset, CancellationToken cancellationToken)
+                public async Task<T> GetAsync(string market, int limit, int offset, CancellationToken cancellationToken)
                 {
-                    var result = await this.GetAsync(market, limit, offset, cancellationToken).ConfigureAwait(false);
+                    var result = await this.searchBuilder.GetAsync<SearchResult>(
+                        cancellationToken,
+                        queryStringParameters: new { q = this.query, type = string.Join(",", this.entities.Select(item => item.GetDescription())), limit, offset },
+                        optionalQueryStringParameters: new { market });
+
                     if (typeof(T) == typeof(SimpleAlbumsPageMessage))
                     {
                         return (T)(object)(new SimpleAlbumsPageMessage { Page = result.Albums });
@@ -97,18 +96,14 @@ namespace FluentSpotifyApi.Builder.Search
                     {
                         return (T)(object)(new SimplePlaylistsPageMessage { Page = result.Playlists });
                     }
+                    else if (typeof(T) == typeof(SearchResult))
+                    {
+                        return (T)(object)result;
+                    }
                     else
                     {
                         throw new ArgumentException(nameof(T));
                     }
-                }
-
-                public Task<SearchResult> GetAsync(string market, int limit, int offset, CancellationToken cancellationToken)
-                {
-                    return this.searchBuilder.GetAsync<SearchResult>(
-                        cancellationToken, 
-                        queryStringParameters: new { q = this.query, type = string.Join(",", this.entities.Select(item => item.GetDescription())), limit, offset },
-                        optionalQueryStringParameters: new { market });
                 }
             }
         }
