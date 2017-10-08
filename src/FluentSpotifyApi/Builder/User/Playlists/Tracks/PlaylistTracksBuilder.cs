@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentSpotifyApi.Expressions.Fields;
 using FluentSpotifyApi.Model;
 using Newtonsoft.Json;
 
@@ -11,6 +13,11 @@ namespace FluentSpotifyApi.Builder.User.Playlists.Tracks
     {
         public PlaylistTracksBuilder(ContextData contextData, IEnumerable<object> routeValuesPrefix, string endpointName) : base(contextData, routeValuesPrefix, endpointName)
         {
+        }
+
+        public Task<Page<PlaylistTrack>> GetAsync(Action<IFieldsBuilder<Page<PlaylistTrack>>> buildFields, int limit, int offset, string market, CancellationToken cancellationToken)
+        {
+            return this.GetAsync(FieldsProvider.Get(buildFields), limit, offset, market, cancellationToken);
         }
 
         public Task<Page<PlaylistTrack>> GetAsync(string fields, int limit, int offset, string market, CancellationToken cancellationToken)

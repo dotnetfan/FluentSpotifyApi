@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentSpotifyApi.Core.Internal.Extensions;
+using FluentSpotifyApi.Expressions.Query;
 using FluentSpotifyApi.Model;
 using FluentSpotifyApi.Model.Messages;
 
@@ -56,6 +58,11 @@ namespace FluentSpotifyApi.Builder.Search
             public ISearchTypeQueryBuilder<T> Matching(string query)
             {
                 return new SearchTypeQueryBuilder(this.searchBuilder, this.entities, query);
+            }
+
+            public ISearchTypeQueryBuilder<T> Matching(Expression<Func<QueryFields, bool>> predicate)
+            {
+                return new SearchTypeQueryBuilder(this.searchBuilder, this.entities, QueryProvider.Get(predicate));
             }
 
             private class SearchTypeQueryBuilder : ISearchTypeQueryBuilder<T>

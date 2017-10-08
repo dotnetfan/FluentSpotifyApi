@@ -16,7 +16,7 @@ namespace FluentSpotifyApi.IntegrationTests.CCF
         public async Task ShouldLoopThroughPagedResultAsync()
         {
             // Arrange + Act
-            var pageResult = await this.Client.Search.Albums.Matching("artist:Metallica").GetAsync();
+            var pageResult = await this.Client.Search.Albums.Matching(f => f.Artist == "Metallica").GetAsync();
             var result = new List<SimpleAlbum>(pageResult.Page.Items);
             while (!string.IsNullOrEmpty(pageResult.Page.Next))
             {

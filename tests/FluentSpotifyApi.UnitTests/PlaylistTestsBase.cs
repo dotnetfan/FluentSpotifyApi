@@ -56,14 +56,18 @@ namespace FluentSpotifyApi.UnitTests
         {
             // Arrange
             const string playlistId = "JIHUIH8943432hU";
-            const string fields = "description,uri";
+            const string fields = "(description,tracks(items(track(name))))";
             const string market = "BR";
 
             var mockResults = this.MockGet<FullPlaylist>();
 
             // Act
             var builder = this.GetPlaylistBuilder(playlistId);
-            var result = await builder.GetAsync(fields: fields, market: market);
+            var result = await builder.GetAsync(
+                buildFields: fieldsBuilder => fieldsBuilder
+                    .Include(p => p.Description)
+                    .Include(p => p.Tracks.Items[0].Track.Name), 
+                market: market);
 
             // Assert
             mockResults.Should().HaveCount(1);
@@ -72,11 +76,29 @@ namespace FluentSpotifyApi.UnitTests
             result.Should().BeSameAs(mockResults.First().Result);
         }
 
+        protected async Task ShouldGetPlaylistWithDefaultsAsync()
+        {
+            // Arrange
+            const string playlistId = "JIHUIH8943432hU";
+        
+            var mockResults = this.MockGet<FullPlaylist>();
+
+            // Act
+            var builder = this.GetPlaylistBuilder(playlistId);
+            var result = await builder.GetAsync();
+
+            // Assert
+            mockResults.Should().HaveCount(1);
+            mockResults.First().QueryParameters.ShouldAllBeEquivalentTo(new(string Key, object Value)[0]);
+            mockResults.First().RouteValues.Should().Equal(new[] { "users", UserId, "playlists", playlistId });
+            result.Should().BeSameAs(mockResults.First().Result);
+        }
+
         protected async Task ShouldGetPlaylistTracksAsync()
         {
             // Arrange
             const string playlistId = "JIHUIH8943432hU";
-            const string fields = "total,limit";
+            const string fields = "(items(added_at,added_by(!display_name)))";
             const int limit = 20;
             const int offset = 10;
             const string market = "BR";
@@ -85,7 +107,13 @@ namespace FluentSpotifyApi.UnitTests
 
             // Act
             var builder = this.GetPlaylistBuilder(playlistId);
-            var result = await builder.Tracks().GetAsync(fields: fields, limit: limit, offset: offset, market: market);
+            var result = await builder.Tracks().GetAsync(
+                buildFields: fieldsBuilder => fieldsBuilder
+                    .Include(t => t.Items[0].AddedAt)
+                    .Exclude(t => t.Items[0].AddedBy.DisplayName), 
+                limit: limit, 
+                offset: offset, 
+                market: market);
 
             // Assert
             mockResults.Should().HaveCount(1);

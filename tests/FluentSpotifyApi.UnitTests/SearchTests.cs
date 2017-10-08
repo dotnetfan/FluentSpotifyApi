@@ -19,12 +19,12 @@ namespace FluentSpotifyApi.UnitTests
             const int limit = 20;
             const int offset = 10;
             const string market = "BS";
-            const string query = "TestAlbum";
+            const string query = "artist:\"Metallica\" NOT album:ride";
 
             var mockResults = this.MockGet<SearchResult>(i => new SearchResult { Albums = new Page<SimpleAlbum>() });
 
             // Act
-            var result = await this.Client.Search.Albums.Matching(query).GetAsync(market: market, limit: limit, offset: offset);
+            var result = await this.Client.Search.Albums.Matching(f => f.Artist == "Metallica" && !f.Album.Contains("ride")).GetAsync(market: market, limit: limit, offset: offset);
 
             // Assert
             mockResults.Should().HaveCount(1);

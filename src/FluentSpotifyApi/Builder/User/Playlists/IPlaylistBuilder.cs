@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentSpotifyApi.Builder.User.Playlists.Tracks;
+using FluentSpotifyApi.Expressions.Fields;
 using FluentSpotifyApi.Model;
 
 namespace FluentSpotifyApi.Builder.User.Playlists
@@ -22,6 +23,18 @@ namespace FluentSpotifyApi.Builder.User.Playlists
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
         Task<FullPlaylist> GetAsync(string fields = null, string market = null, CancellationToken cancellationToken = default(CancellationToken));
+
+        /// <summary>
+        /// Get a playlist owned by a Spotify user.
+        /// </summary>
+        /// <param name="buildFields">
+        /// The action for building fields.
+        /// The <see cref="FieldsProvider.Get{TInput}(Action{IFieldsBuilder{TInput}})"/> method can be used to get fields in string format.
+        /// </param>
+        /// <param name="market">An ISO 3166-1 alpha-2 country code.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns></returns>
+        Task<FullPlaylist> GetAsync(Action<IFieldsBuilder<FullPlaylist>> buildFields, string market = null, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Change a playlist’s name and public/private state. (The user must, of course, own the playlist.)

@@ -192,7 +192,7 @@ namespace FluentSpotifyApi.Core.Client
                     requestContentProvider,
                     async (response, innerCt) =>
                     {
-                        var matchingAttribute = typeof(T).GetTypeInfo().GetCustomAttributes().OfType<HttpStatusCodeToExceptionAttribute>().FirstOrDefault(item => item.StatusCode == response.StatusCode);
+                        var matchingAttribute = typeof(T).GetTypeInfo().GetCustomAttributes<HttpStatusCodeToExceptionAttribute>().FirstOrDefault(item => item.StatusCode == response.StatusCode);
                         if (matchingAttribute != null)
                         {
                             throw (Exception)Activator.CreateInstance(matchingAttribute.ExceptionType);

@@ -13,7 +13,7 @@ namespace FluentSpotifyApi.IntegrationTests.CCF
         public async Task ShouldSearchAlbumsAsync()
         {
             // Arrange + Act
-            var result = await this.Client.Search.Albums.Matching("Metallica").GetAsync();
+            var result = await this.Client.Search.Albums.Matching(f => f.Any.Contains("Metallica")).GetAsync();
 
             // Assert
             result.Page.Items.Should().NotBeEmpty();
@@ -24,7 +24,7 @@ namespace FluentSpotifyApi.IntegrationTests.CCF
         public async Task ShouldSearchArtistsAsync()
         {
             // Arrange + Act
-            var result = await this.Client.Search.Artists.Matching("Metallica").GetAsync();
+            var result = await this.Client.Search.Artists.Matching(f => f.Any.Contains("Metallica")).GetAsync();
 
             // Assert
             result.Page.Items.Should().NotBeEmpty();
@@ -35,7 +35,7 @@ namespace FluentSpotifyApi.IntegrationTests.CCF
         public async Task ShouldSearchPlaylistsAsync()
         {
             // Arrange + Act
-            var result = await this.Client.Search.Playlists.Matching("Metallica").GetAsync();
+            var result = await this.Client.Search.Playlists.Matching(f => f.Any.Contains("Metallica")).GetAsync();
 
             // Assert
             result.Page.Items.Should().NotBeEmpty();
@@ -46,7 +46,7 @@ namespace FluentSpotifyApi.IntegrationTests.CCF
         public async Task ShouldSearchTracksAsync()
         {
             // Arrange + Act
-            var result = await this.Client.Search.Tracks.Matching("Metallica").GetAsync();
+            var result = await this.Client.Search.Tracks.Matching(f => f.Any.Contains("Metallica")).GetAsync();
 
             // Assert
             result.Page.Items.Should().NotBeEmpty();
@@ -57,7 +57,7 @@ namespace FluentSpotifyApi.IntegrationTests.CCF
         public async Task ShouldSearchAnyAsync()
         {
             // Arrange + Act
-            var result = await this.Client.Search.Entities().Matching("Metallica").GetAsync();
+            var result = await this.Client.Search.Entities().Matching(f => f.Any.Contains("Metallica")).GetAsync();
 
             // Assert
             result.Albums.Items.Should().NotBeEmpty();
@@ -71,7 +71,7 @@ namespace FluentSpotifyApi.IntegrationTests.CCF
         public async Task ShouldSearchAlbumsAndArtistsAsync()
         {
             // Arrange + Act
-            var result = await this.Client.Search.Entities(Entity.Artist, Entity.Album).Matching("Metallica").GetAsync();
+            var result = await this.Client.Search.Entities(Entity.Artist, Entity.Album).Matching(f => f.Any.Contains("Metallica")).GetAsync();
 
             // Assert
             result.Albums.Items.Should().NotBeEmpty();

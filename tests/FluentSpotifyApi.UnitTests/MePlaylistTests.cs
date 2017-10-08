@@ -22,7 +22,13 @@ namespace FluentSpotifyApi.UnitTests
         [TestMethod]
         public async Task ShouldGetMyPlaylistAsync()
         {
-            await this.ShouldGetPlaylistsAsync();
+            await this.ShouldGetPlaylistAsync();
+        }
+
+        [TestMethod]
+        public async Task ShouldGetMyPlaylistWithDefaultsAsync()
+        {
+            await this.ShouldGetPlaylistWithDefaultsAsync();
         }
 
         [TestMethod]

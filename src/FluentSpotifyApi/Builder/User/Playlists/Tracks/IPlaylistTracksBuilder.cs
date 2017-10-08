@@ -1,5 +1,7 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
+using FluentSpotifyApi.Expressions.Fields;
 using FluentSpotifyApi.Model;
 
 namespace FluentSpotifyApi.Builder.User.Playlists.Tracks
@@ -19,6 +21,20 @@ namespace FluentSpotifyApi.Builder.User.Playlists.Tracks
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
         Task<Page<PlaylistTrack>> GetAsync(string fields = null, int limit = 100, int offset = 0, string market = null, CancellationToken cancellationToken = default(CancellationToken));
+
+        /// <summary>
+        /// Get full details of the tracks of a playlist owned by a Spotify user.
+        /// </summary>
+        /// <param name="buildFields">
+        /// The action for building fields.
+        /// The <see cref="FieldsProvider.Get{TInput}(Action{IFieldsBuilder{TInput}})"/> method can be used to get fields in string format.
+        /// </param>
+        /// <param name="limit">The maximum number of tracks to return. Default: 100. Minimum: 1. Maximum: 100.</param>
+        /// <param name="offset">The index of the first track to return. Default: 0 (the first object).</param>
+        /// <param name="market">An ISO 3166-1 alpha-2 country code.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns></returns>
+        Task<Page<PlaylistTrack>> GetAsync(Action<IFieldsBuilder<Page<PlaylistTrack>>> buildFields, int limit = 100, int offset = 0, string market = null, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Reorder a track or a group of tracks in a playlist.

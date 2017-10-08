@@ -202,7 +202,11 @@ namespace FluentSpotifyApi.Core.UnitTests
         }
 
         [HttpStatusCodeToException(StatusCode = System.Net.HttpStatusCode.Accepted, ExceptionType = typeof(TestException))]
-        private class TestResultWithHttpStatusCodeToExceptionAttribute
+        private class TestResultWithHttpStatusCodeToExceptionAttributeBase
+        {
+        }
+
+        private class TestResultWithHttpStatusCodeToExceptionAttribute : TestResultWithHttpStatusCodeToExceptionAttributeBase
         {
         }
 
