@@ -59,6 +59,36 @@ namespace FluentSpotifyApi.UnitTests.Expressions
         }
 
         [TestMethod]
+        public void ShouldRemoveSpecialCharactersInPredicate()
+        {
+            // Arrange + Act
+            var query = QueryProvider.Get<QueryFields>(
+                f =>
+                    f.Artist == "test \" artist" &&
+                    f.Album.Contains("test \"\" album:album"),
+                new QueryOptions { RemoveSpecialCharacters = true });
+
+            // Assert
+            query.Should().Be("artist:\"test  artist\" album:test  albumalbum");
+        }
+
+        [TestMethod]
+        public void ShouldNormalizePartialMatchInPredicate()
+        {
+            // Arrange + Act
+            var query = QueryProvider.Get<QueryFields>(
+                f =>
+                    f.Artist.Contains("part1 part2 part3") &&
+                    !f.Album.Contains("me OR my") &&
+                    f.Track.Contains("    ") && 
+                    f.Any.Contains("any1 any2   any3"),
+                new QueryOptions { NormalizePartialMatch = true });
+
+            // Assert
+            query.Should().Be("artist:part1 artist:part2 artist:part3 NOT album:me NOT album:or NOT album:my track: any1 any2 any3");
+        }
+
+        [TestMethod]
         public void ShouldThrowArgumentExceptionWhenUnaryOperandIsNotSupported()
         {
             // Arrange + Act + Assert

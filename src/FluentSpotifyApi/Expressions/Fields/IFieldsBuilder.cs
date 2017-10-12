@@ -17,7 +17,9 @@ namespace FluentSpotifyApi.Expressions.Fields
         /// The expression to be included.
         /// The indexer operator can be used to include array properties (e.g. <c>f => f.Items[0].Name</c>).
         /// </param>
-        /// <returns></returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// Thrown when <paramref name="expression"/> is null.
+        /// </exception>
         IFieldsBuilder<TInput> Include<TResult>(Expression<Func<TInput, TResult>> expression);
 
         /// <summary>
@@ -28,7 +30,9 @@ namespace FluentSpotifyApi.Expressions.Fields
         /// The expression to be excluded.
         /// The indexer operator can be used to exclude array properties (e.g. <c>f => f.Items[0].Name</c>).
         /// </param>
-        /// <returns></returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// Thrown when <paramref name="expression"/> is null.
+        /// </exception>
         IFieldsBuilder<TInput> Exclude<TResult>(Expression<Func<TInput, TResult>> expression);
     }
 }

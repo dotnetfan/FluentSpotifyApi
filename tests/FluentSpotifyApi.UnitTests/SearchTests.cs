@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using FluentSpotifyApi.Builder.Search;
+using FluentSpotifyApi.Expressions.Query;
 using FluentSpotifyApi.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -58,12 +59,15 @@ namespace FluentSpotifyApi.UnitTests
             const int limit = 20;
             const int offset = 10;
             const string market = "BS";
-            const string query = "TestArtists";
+            const string query = "artist:bur* artist:the NOT artist:after";
 
             var mockResults = this.MockGet<SearchResult>(i => new SearchResult { Artists = new Page<FullArtist>() });
 
             // Act
-            var result = await this.Client.Search.Artists.Matching(query).GetAsync(market: market, limit: limit, offset: offset);
+            var result = await this.Client.Search
+                .Artists
+                .Matching(f => f.Artist.Contains("bur* the") && !f.Artist.Contains("after"), new QueryOptions { NormalizePartialMatch = true })
+                .GetAsync(market: market, limit: limit, offset: offset);
 
             // Assert
             mockResults.Should().HaveCount(1);

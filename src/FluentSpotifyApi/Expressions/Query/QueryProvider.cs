@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using FluentSpotifyApi.Core.Internal.Extensions;
 
 namespace FluentSpotifyApi.Expressions.Query
@@ -18,24 +19,62 @@ namespace FluentSpotifyApi.Expressions.Query
         /// </summary>
         /// <typeparam name="TInput">The type of the input.</typeparam>
         /// <param name="predicate">The predicate expression.</param>
-        /// <exception cref="ArgumentException">
-        /// Thrown when predicate expression is not valid.
+        /// <exception cref="System.ArgumentNullException">
+        /// Thrown when <paramref name="predicate"/> is null.
         /// </exception>
-        public static string Get<TInput>(Expression<Func<TInput, bool>> predicate)
+        /// <exception cref="ArgumentException">
+        /// Thrown when <paramref name="predicate"/> is not valid.
+        /// </exception>
+        public static string Get<TInput>(Expression<Func<TInput, bool>> predicate) => Get(predicate, new QueryOptions());
+
+        /// <summary>
+        /// Gets query from the specified predicate expression.
+        /// </summary>
+        /// <typeparam name="TInput">The type of the input.</typeparam>
+        /// <param name="predicate">The predicate expression.</param>
+        /// <param name="queryOptions">The query options.</param>
+        /// <exception cref="System.ArgumentNullException">
+        /// Thrown when <paramref name="predicate"/> or <paramref name="queryOptions"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// Thrown when <paramref name="predicate"/> is not valid.
+        /// </exception>
+        public static string Get<TInput>(Expression<Func<TInput, bool>> predicate, QueryOptions queryOptions)
         {
-            return new QueryProviderHelper<TInput>(predicate).Get();
+            if (predicate == null)
+            {
+                throw new ArgumentNullException(nameof(predicate));
+            }
+
+            if (queryOptions == null)
+            {
+                throw new ArgumentNullException(nameof(queryOptions));
+            }
+
+            return new QueryProviderHelper<TInput>(predicate, queryOptions).Get();
         }
 
         private class QueryProviderHelper<TInput>
         {
+            private const string OrOperator = "OR";
+
+            private const string NotOperator = "NOT";
+
+            private static readonly string[] Operators = new[] { OrOperator, NotOperator };
+
+            private static readonly Regex SpaceRegex = new Regex(@"\s+", RegexOptions.Compiled);
+
             private readonly ParameterExpression parameterExpression;
 
             private readonly Expression body;
 
-            public QueryProviderHelper(Expression<Func<TInput, bool>> predicate)
+            private readonly QueryOptions queryOptions;
+
+            public QueryProviderHelper(Expression<Func<TInput, bool>> predicate, QueryOptions queryOptions)
             {
                 this.parameterExpression = predicate.Parameters.First();
                 this.body = predicate.Body;
+                this.queryOptions = queryOptions;
             }
 
             public string Get()
@@ -71,7 +110,7 @@ namespace FluentSpotifyApi.Expressions.Query
                         }
                         else if (ExpressionHelpers.IsContainsCall(expression))
                         {
-                            term = this.ProcessContainsCallExpression((MethodCallExpression)expression);
+                            term = this.ProcessContainsCallExpression((MethodCallExpression)expression, i > 0 ? list[i - 1] : null);
                         }
                         else
                         {
@@ -88,10 +127,10 @@ namespace FluentSpotifyApi.Expressions.Query
                                 sb.Append(" ");
                                 break;
                             case ExpressionType.OrElse:
-                                sb.Append(" OR ");
+                                sb.Append($" {OrOperator} ");
                                 break;
                             case ExpressionType.Not:
-                                sb.Append("NOT ");
+                                sb.Append($"{NotOperator} ");
                                 break;
                             default:
                                 throw new ArgumentException($"Unsupported expression type '{expressionType}' has been found.");
@@ -138,6 +177,11 @@ namespace FluentSpotifyApi.Expressions.Query
 
                 if (value == null || value is string)
                 {
+                    if (this.queryOptions.RemoveSpecialCharacters)
+                    {
+                        stringValue = stringValue.Replace("\"", string.Empty);
+                    }
+
                     stringValue = $"\"{stringValue}\"";
                 }
 
@@ -242,7 +286,7 @@ namespace FluentSpotifyApi.Expressions.Query
                 return (isLower, queryField, value);
             }
 
-            private string ProcessContainsCallExpression(MethodCallExpression expression)
+            private string ProcessContainsCallExpression(MethodCallExpression expression, object lastItem)
             {
                 if (!this.TryGetQueryField(expression.Object, out string queryField))
                 {
@@ -251,7 +295,39 @@ namespace FluentSpotifyApi.Expressions.Query
 
                 var stringValue = this.GetValue(expression.Arguments.First()).ToInvariantString();
 
-                return this.GetTerm(queryField, stringValue);
+                if (this.queryOptions.RemoveSpecialCharacters)
+                {
+                    stringValue = stringValue.Replace("\"", string.Empty).Replace(":", string.Empty);
+                }
+
+                if (this.queryOptions.NormalizePartialMatch)
+                {
+                    var sb = new StringBuilder();
+
+                    var isFirst = true;
+                    foreach (var word in SpaceRegex.Split(stringValue).Where(item => !string.IsNullOrEmpty(item)))
+                    {
+                        if (!isFirst)
+                        {
+                            sb.Append(" ");
+
+                            if (lastItem is ExpressionType expressionType && expressionType == ExpressionType.Not)
+                            {
+                                sb.Append($"{NotOperator} ");
+                            }
+                        }
+                        
+                        sb.Append(this.GetTerm(queryField, Operators.Contains(word, StringComparer.OrdinalIgnoreCase) ? word.ToLower() : word));
+
+                        isFirst = false;
+                    }
+
+                    return sb.Length == 0 ? this.GetTerm(queryField, string.Empty) : sb.ToString();
+                }
+                else
+                {
+                    return this.GetTerm(queryField, stringValue);
+                }
             }
 
             private string GetTerm(string queryField, string value)

@@ -65,6 +65,11 @@ namespace FluentSpotifyApi.Builder.Search
                 return new SearchTypeQueryBuilder(this.searchBuilder, this.entities, QueryProvider.Get(predicate));
             }
 
+            public ISearchTypeQueryBuilder<T> Matching(Expression<Func<QueryFields, bool>> predicate, QueryOptions queryOptions)
+            {
+                return new SearchTypeQueryBuilder(this.searchBuilder, this.entities, QueryProvider.Get(predicate, queryOptions));
+            }
+
             private class SearchTypeQueryBuilder : ISearchTypeQueryBuilder<T>
             {
                 private readonly SearchBuilder searchBuilder;

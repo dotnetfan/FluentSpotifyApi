@@ -13,6 +13,11 @@ namespace FluentSpotifyApi.Expressions.Fields
 
         public IFieldsBuilder<TInput> Include<TResult>(Expression<Func<TInput, TResult>> expression)
         {
+            if (expression == null)
+            {
+                throw new ArgumentNullException(nameof(expression));
+            }
+
             this.expressions.Add((expression, false));
 
             return this;
@@ -20,6 +25,11 @@ namespace FluentSpotifyApi.Expressions.Fields
 
         public IFieldsBuilder<TInput> Exclude<TResult>(Expression<Func<TInput, TResult>> expression)
         {
+            if (expression == null)
+            {
+                throw new ArgumentNullException(nameof(expression));
+            }
+
             this.expressions.Add((expression, true));
 
             return this;
