@@ -123,10 +123,6 @@ namespace FluentSpotifyApi
 
             private readonly IList<Func<IServiceProvider, IHttpClientWrapper, IHttpClientWrapper>> httpClientWrapperFactories;
 
-            private readonly IList<IHttpClientWrapper> httpClientWrappers;
-
-            private readonly object locker;
-
             public DecoratorContainer(
                 IServiceCollection services,
                 Func<IServiceProvider, IHttpClientWrapper> baseFactory)
@@ -140,16 +136,19 @@ namespace FluentSpotifyApi
                             baseFactory(serviceProvider))
                 });
 
-                this.httpClientWrappers = new List<IHttpClientWrapper>();
-                this.locker = new object();
+                this.services.RegisterSingleton(serviceProvider => new DecoratorsWrapper(this.httpClientWrapperFactories));
 
-                this.services.RegisterSingleton(serviceProvider => this.GetHttpClientWrapper(serviceProvider, null));
+                this.services.RegisterSingleton(serviceProvider => serviceProvider
+                    .GetRequiredService<DecoratorsWrapper>()
+                    .GetHttpClientWrapper(serviceProvider, null));
             }
 
             public Func<IServiceProvider, IHttpClientWrapper> GetCurrentHttpClientWrapperFactory()
             {
                 var lastIndex = this.httpClientWrapperFactories.Count - 1;
-                return serviceProvider => this.GetHttpClientWrapper(serviceProvider, lastIndex);
+                return serviceProvider => serviceProvider
+                    .GetRequiredService<DecoratorsWrapper>()
+                    .GetHttpClientWrapper(serviceProvider, lastIndex);
             }
 
             public void AddDecoratorFactory(Func<IServiceProvider, IHttpClientWrapper, IHttpClientWrapper> func)
@@ -157,26 +156,51 @@ namespace FluentSpotifyApi
                 this.httpClientWrapperFactories.Add(func);
             }
 
-            private IHttpClientWrapper GetHttpClientWrapper(IServiceProvider serviceProvider, int? index)
+            private class DecoratorsWrapper : IDisposable
             {
-                lock (this.locker)
+                private readonly IList<Func<IServiceProvider, IHttpClientWrapper, IHttpClientWrapper>> httpClientWrapperFactories;
+
+                private readonly IList<IHttpClientWrapper> httpClientWrappers;
+
+                private readonly object locker;
+
+                public DecoratorsWrapper(IList<Func<IServiceProvider, IHttpClientWrapper, IHttpClientWrapper>> httpClientWrapperFactories)
                 {
-                    index = index ?? this.httpClientWrapperFactories.Count - 1;
+                    this.httpClientWrapperFactories = httpClientWrapperFactories;
 
-                    if (this.httpClientWrappers.Count - 1 >= index)
+                    this.httpClientWrappers = new List<IHttpClientWrapper>();
+                    this.locker = new object();
+                }
+
+                public IHttpClientWrapper GetHttpClientWrapper(IServiceProvider serviceProvider, int? index)
+                {
+                    lock (this.locker)
                     {
-                        return this.httpClientWrappers[index.Value];
-                    }
-                    else
-                    {
-                        var httpClientWrapper = this.httpClientWrappers.LastOrDefault();
-                        for (var i = this.httpClientWrappers.Count; i <= index; i++)
+                        index = index ?? this.httpClientWrapperFactories.Count - 1;
+
+                        if (this.httpClientWrappers.Count - 1 >= index)
                         {
-                            httpClientWrapper = this.httpClientWrapperFactories[i](serviceProvider, httpClientWrapper);
-                            this.httpClientWrappers.Add(httpClientWrapper);
+                            return this.httpClientWrappers[index.Value];
                         }
+                        else
+                        {
+                            var httpClientWrapper = this.httpClientWrappers.LastOrDefault();
+                            for (var i = this.httpClientWrappers.Count; i <= index; i++)
+                            {
+                                httpClientWrapper = this.httpClientWrapperFactories[i](serviceProvider, httpClientWrapper);
+                                this.httpClientWrappers.Add(httpClientWrapper);
+                            }
 
-                        return httpClientWrapper;
+                            return httpClientWrapper;
+                        }
+                    }
+                }
+
+                public void Dispose()
+                {
+                    foreach (var item in this.httpClientWrappers.OfType<IDisposable>())
+                    {
+                        item.Dispose();
                     }
                 }
             }
