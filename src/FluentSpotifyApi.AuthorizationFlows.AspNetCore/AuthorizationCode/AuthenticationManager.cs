@@ -35,7 +35,6 @@ namespace FluentSpotifyApi.AuthorizationFlows.AspNetCore.AuthorizationCode
         {
             var httpContext = this.httpContextAccessor.HttpContext;
 
-            await httpContext.SignOutAsync(this.authenticationScheme).ConfigureAwait(false);
             await httpContext.SignInAsync(this.authenticationScheme, authenticateResult.Principal, authenticateResult.Properties).ConfigureAwait(false);
         }
 
