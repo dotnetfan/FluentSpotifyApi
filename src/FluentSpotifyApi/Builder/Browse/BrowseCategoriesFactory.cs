@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 
-namespace FluentSpotifyApi.Builder.Browse.Categories
+namespace FluentSpotifyApi.Builder.Browse
 {
-    internal static class Factory
+    internal static class BrowseCategoriesFactory
     {
         private const string EndpointName = "categories";
 

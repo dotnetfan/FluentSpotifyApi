@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using GalaSoft.MvvmLight;
 
-namespace FluentSpotifyApi.Sample.ACF.UWP.Common
+namespace FluentSpotifyApi.Sample.ACF.UWP.ViewModels
 {
     public class CancelableActionViewModel : ViewModelBase
     {

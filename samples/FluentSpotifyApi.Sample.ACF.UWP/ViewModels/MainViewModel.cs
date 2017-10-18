@@ -4,7 +4,6 @@ using System.Linq;
 using FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Exceptions;
 using FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Native;
 using FluentSpotifyApi.Core.Exceptions;
-using FluentSpotifyApi.Sample.ACF.UWP.Common;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 

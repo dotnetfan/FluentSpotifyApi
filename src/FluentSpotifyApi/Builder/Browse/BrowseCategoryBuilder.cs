@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentSpotifyApi.Model.Browse;
 
-namespace FluentSpotifyApi.Builder.Browse.Categories
+namespace FluentSpotifyApi.Builder.Browse
 {
     internal class BrowseCategoryBuilder : EntityBuilderBase, IBrowseCategoryBuilder
     {

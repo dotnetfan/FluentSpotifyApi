@@ -2,7 +2,6 @@
 using FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Native;
 using FluentSpotifyApi.Core.Exceptions;
 using FluentSpotifyApi.Core.Model;
-using FluentSpotifyApi.Sample.ACF.UWP.Common;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 

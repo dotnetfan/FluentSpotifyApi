@@ -9,7 +9,7 @@ using FluentSpotifyApi.Model;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
-namespace FluentSpotifyApi.AuthorizationFlows.UnitTests.AuthorizationCode.Native
+namespace FluentSpotifyApi.AuthorizationFlows.AspNetCore.UnitTests.AuthorizationCode
 {
     [TestClass]
     public class AuthenticatedClientCallTests : TestBase

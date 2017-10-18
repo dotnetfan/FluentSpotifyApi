@@ -12,11 +12,11 @@
 
         public IBrowseNewReleasesBuilder NewReleases => new BrowseNewReleasesBuilder(this.ContextData, this.RouteValuesPrefix);
 
-        public IBrowseCategoriesBuilder Categories => Browse.Categories.Factory.CreateCategoriesBuilder(this.ContextData, this.RouteValuesPrefix);
+        public IBrowseCategoriesBuilder Categories => BrowseCategoriesFactory.CreateCategoriesBuilder(this.ContextData, this.RouteValuesPrefix);
 
         public IBrowseCategoryBuilder Category(string id)
         {
-            return Browse.Categories.Factory.CreateCategoryBuilder(this.ContextData, this.RouteValuesPrefix, id);
+            return BrowseCategoriesFactory.CreateCategoryBuilder(this.ContextData, this.RouteValuesPrefix, id);
         }
     }
 }
