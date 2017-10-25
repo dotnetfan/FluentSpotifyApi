@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26730.15
+VisualStudioVersion = 15.0.27004.2005
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B8A199F2-0A20-4174-8E8D-5DBA80FA20E5}"
 EndProject
@@ -48,7 +48,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentSpotifyApi.UnitTestin
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentSpotifyApi.Sample.ACF.UWP", "samples\FluentSpotifyApi.Sample.ACF.UWP\FluentSpotifyApi.Sample.ACF.UWP.csproj", "{AEEDA750-876B-4CF3-964C-62CCD66A5291}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FluentSpotifyApi.AuthorizationFlows.AspNetCore.UnitTests", "tests\FluentSpotifyApi.AuthorizationFlows.AspNetCore.UnitTests\FluentSpotifyApi.AuthorizationFlows.AspNetCore.UnitTests.csproj", "{809A58B1-E477-4E90-B59D-16B34FEB3D44}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FluentSpotifyApi.AuthorizationFlows.AspNetCore.UnitTests", "tests\FluentSpotifyApi.AuthorizationFlows.AspNetCore.UnitTests\FluentSpotifyApi.AuthorizationFlows.AspNetCore.UnitTests.csproj", "{809A58B1-E477-4E90-B59D-16B34FEB3D44}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "stylecop", "stylecop", "{2DE17C1C-40BB-424A-9292-265F0907EB77}"
+	ProjectSection(SolutionItems) = preProject
+		Settings.StyleCop = Settings.StyleCop
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1345E3F8-EC4B-48D2-B039-D087632C54DF}"
+	ProjectSection(SolutionItems) = preProject
+		tests\Settings.StyleCop = tests\Settings.StyleCop
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -330,6 +340,7 @@ Global
 		{04B8B795-43EF-49D5-BADD-5F6DC006FD3C} = {68A5890F-3363-4AE7-818A-03FDFBF41CE4}
 		{AEEDA750-876B-4CF3-964C-62CCD66A5291} = {D8B8743F-2E70-4C24-B386-9D893D66BA08}
 		{809A58B1-E477-4E90-B59D-16B34FEB3D44} = {68A5890F-3363-4AE7-818A-03FDFBF41CE4}
+		{1345E3F8-EC4B-48D2-B039-D087632C54DF} = {2DE17C1C-40BB-424A-9292-265F0907EB77}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {61EBB4B0-853D-45DC-8803-47F67A4C2501}
