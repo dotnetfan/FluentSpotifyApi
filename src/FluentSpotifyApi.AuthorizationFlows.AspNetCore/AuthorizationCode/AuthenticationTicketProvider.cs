@@ -10,6 +10,7 @@ using FluentSpotifyApi.AuthorizationFlows.Core.Client.Token;
 using FluentSpotifyApi.AuthorizationFlows.Core.Date;
 using FluentSpotifyApi.AuthorizationFlows.Core.Extensions;
 using FluentSpotifyApi.AuthorizationFlows.Core.Model;
+using FluentSpotifyApi.Core.Internal.Extensions;
 using FluentSpotifyApi.Core.Model;
 using FluentSpotifyApi.Core.Options;
 using Microsoft.AspNetCore.Authentication;
@@ -32,41 +33,59 @@ namespace FluentSpotifyApi.AuthorizationFlows.AspNetCore.AuthorizationCode
 
         private readonly IOptionsProvider<AspNetCoreAuthorizationCodeFlowOptions> optionsProvider;
 
+        private readonly ISemaphoreProvider semaphoreProvider;
+
         public AuthenticationTicketProvider(
             IAuthenticationManager authenticationManager, 
             IDateTimeOffsetProvider dateTimeOffsetProvider,
             ITokenHttpClient tokenHttpClient,
-            IOptionsProvider<AspNetCoreAuthorizationCodeFlowOptions> optionsProvider) 
+            IOptionsProvider<AspNetCoreAuthorizationCodeFlowOptions> optionsProvider,
+            ISemaphoreProvider semaphoreProvider) 
         {
             this.authenticationManager = authenticationManager;
             this.dateTimeOffsetProvider = dateTimeOffsetProvider;
             this.tokenHttpClient = tokenHttpClient;
             this.optionsProvider = optionsProvider;
+            this.semaphoreProvider = semaphoreProvider;
         }
 
         public async Task<IAuthenticationTicket> GetAsync(CancellationToken cancellationToken)
         {
             this.ValidateOptionsMapping();
 
-            var authenticateResult = await this.authenticationManager.GetAsync(cancellationToken).ConfigureAwait(false);
-            var authenticationTicket = new AuthenticationTicket(authenticateResult);
+            var result = await this.semaphoreProvider.Get().ExecuteAsync(
+                async innerCt =>
+                {
+                    var authenticateResult = await this.authenticationManager.GetAsync(innerCt).ConfigureAwait(false);
+                    var authenticationTicket = new AuthenticationTicket(authenticateResult);
 
-            if (!authenticationTicket.AccessToken.IsValid(this.dateTimeOffsetProvider))
-            {
-                authenticationTicket = await this.GetNewAccessTokenAsync(authenticationTicket, authenticateResult, cancellationToken).ConfigureAwait(false);
-            }
+                    if (!authenticationTicket.AccessToken.IsValid(this.dateTimeOffsetProvider))
+                    {
+                        authenticationTicket = await this.GetNewAccessTokenAsync(authenticationTicket, authenticateResult, innerCt).ConfigureAwait(false);
+                    }
 
-            return authenticationTicket;
+                    return authenticationTicket;
+                },
+                cancellationToken).ConfigureAwait(false);
+
+            return result;
         }
 
         public async Task<IAuthenticationTicket> RenewAccessTokenAsync(IAuthenticationTicket currentAuthenticationTicket, CancellationToken cancellationToken)
         {
             this.ValidateOptionsMapping();
 
-            var authenticateResult = await this.authenticationManager.GetAsync(cancellationToken).ConfigureAwait(false);
-            var authenticationTicket = new AuthenticationTicket(authenticateResult);
+            var result = await this.semaphoreProvider.Get().ExecuteAsync(
+                async innerCt =>
+                {
+                    var authenticateResult = await this.authenticationManager.GetAsync(innerCt).ConfigureAwait(false);
+                    var authenticationTicket = new AuthenticationTicket(authenticateResult);
 
-            return await this.GetNewAccessTokenAsync(authenticationTicket, authenticateResult, cancellationToken).ConfigureAwait(false);
+                    return await this.GetNewAccessTokenAsync(authenticationTicket, authenticateResult, innerCt).ConfigureAwait(false);
+                },
+                cancellationToken).ConfigureAwait(false);
+
+            return result;
         }
 
         private async Task<AuthenticationTicket> GetNewAccessTokenAsync(AuthenticationTicket authenticationTicket, IAuthenticateResult authenticateResult, CancellationToken cancellationToken)

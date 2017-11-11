@@ -38,7 +38,7 @@ namespace FluentSpotifyApi.AuthorizationFlows.AspNetCore.UnitTests.Authorization
         private const string ClientSecret = "Test Client Secret";
 
         private readonly string tokenEndpoint = "http://localhost/token";
-
+       
         private IServiceProvider serviceProvider;
 
         protected AuthenticationManagerStub AuthenticationManager { get; private set; }
@@ -79,6 +79,8 @@ namespace FluentSpotifyApi.AuthorizationFlows.AspNetCore.UnitTests.Authorization
             this.SpotifyOptionsMonitorMock = new Mock<IOptionsMonitor<SpotifyOptions>>(MockBehavior.Strict);
             this.SpotifyOptionsMonitorMock.Setup(x => x.CurrentValue).Returns(new SpotifyOptions { ClientId = ClientId, ClientSecret = ClientSecret, TokenEndpoint = this.tokenEndpoint });
             services.RegisterSingleton(this.SpotifyOptionsMonitorMock.Object);
+
+            services.Replace(ServiceDescriptor.Singleton<ISemaphoreProvider>(new SempahoreProviderStub()));
 
             this.serviceProvider = services.BuildServiceProvider();
 
@@ -159,6 +161,18 @@ namespace FluentSpotifyApi.AuthorizationFlows.AspNetCore.UnitTests.Authorization
                 public ClaimsPrincipal Principal { get; set; }
 
                 public AuthenticationProperties Properties { get; set; }
+            }
+        }
+
+        private class SempahoreProviderStub : ISemaphoreProvider, IDisposable
+        {
+            private readonly SemaphoreSlim semaphore = new SemaphoreSlim(1);
+
+            public SemaphoreSlim Get() => this.semaphore;
+
+            public void Dispose()
+            {
+                this.semaphore.Dispose();
             }
         }
     }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using FluentAssertions;
-using FluentSpotifyApi.AuthorizationFlows.AspNetCore.UnitTests.AuthorizationCode;
 using FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Exceptions;
 using FluentSpotifyApi.AuthorizationFlows.Core.Client.Token;
 using FluentSpotifyApi.Core.Exceptions;

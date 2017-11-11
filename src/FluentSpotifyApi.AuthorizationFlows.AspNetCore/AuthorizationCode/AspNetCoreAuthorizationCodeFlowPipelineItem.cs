@@ -42,6 +42,9 @@ namespace FluentSpotifyApi.AuthorizationFlows.AspNetCore.AuthorizationCode
                 serviceProvider.GetRequiredService<IHttpContextAccessor>(),
                 this.authenticationScheme));
 
+            services.RegisterSingleton<ISemaphoreProvider, SemaphoreProvider>();
+            services.AddScoped(serviceProvider => new SemaphoreRegistrationWrapper(new System.Threading.SemaphoreSlim(1), true));
+
             services.RegisterSingleton<IAuthenticationTicketProvider, AuthenticationTicketProvider>();
         }
 
