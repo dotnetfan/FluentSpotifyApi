@@ -1,19 +1,21 @@
-﻿using System.Collections.Generic;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
+using FluentSpotifyApi.Extensions;
 using FluentSpotifyApi.Model;
+using FluentSpotifyApi.Model.Tracks;
 
 namespace FluentSpotifyApi.Builder.Albums
 {
     internal class AlbumTracksBuilder : BuilderBase, IAlbumTracksBuilder
     {
-        public AlbumTracksBuilder(ContextData contextData, IEnumerable<object> routeValuesPrefix) : base(contextData, routeValuesPrefix, "tracks")
+        public AlbumTracksBuilder(BuilderBase parent)
+            : base(parent, "tracks".Yield())
         {
         }
 
-        public Task<Page<SimpleTrack>> GetAsync(int limit, int offset, string market, CancellationToken cancellationToken)
+        public Task<Page<SimplifiedTrack>> GetAsync(string market, int? limit, int? offset, CancellationToken cancellationToken)
         {
-            return this.GetAsync<Page<SimpleTrack>>(cancellationToken, queryStringParameters: new { limit, offset }, optionalQueryStringParameters: new { market });
+            return this.GetAsync<Page<SimplifiedTrack>>(cancellationToken, queryParams: new { market, limit, offset });
         }
     }
 }

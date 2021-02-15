@@ -1,24 +1,25 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using FluentSpotifyApi.Model;
+using FluentSpotifyApi.Model.Artists;
 
 namespace FluentSpotifyApi.Builder.Artists
 {
     internal class ArtistBuilder : EntityBuilderBase, IArtistBuilder
     {
-        public ArtistBuilder(ContextData contextData, string endpointName, string id) : base(contextData, endpointName, id)
+        public ArtistBuilder(RootBuilder root, string id)
+            : base(root, "artists", id)
         {
         }
 
-        public IArtistAlbumsBuilder Albums => new ArtistAlbumsBuilder(ContextData, RouteValuesPrefix);
+        public IArtistAlbumsBuilder Albums => new ArtistAlbumsBuilder(this);
 
-        public IArtistTopTracksBuilder TopTracks => new ArtistTopTracksBuilder(ContextData, RouteValuesPrefix);
+        public IArtistTopTracksBuilder TopTracks => new ArtistTopTracksBuilder(this);
 
-        public IArtistRelatedArtistsBuilder RelatedArtists => new ArtistRelatedArtistsBuilder(ContextData, RouteValuesPrefix);
+        public IArtistRelatedArtistsBuilder RelatedArtists => new ArtistRelatedArtistsBuilder(this);
 
-        public Task<FullArtist> GetAsync(CancellationToken cancellationToken)
+        public Task<Artist> GetAsync(CancellationToken cancellationToken)
         {
-            return this.GetAsync<FullArtist>(cancellationToken);
+            return this.GetAsync<Artist>(cancellationToken);
         }
     }
 }

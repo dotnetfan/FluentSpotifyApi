@@ -1,28 +1,24 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
+using FluentSpotifyApi.Core.Model;
+using FluentSpotifyApi.Model.Albums;
 
 namespace FluentSpotifyApi.Model.Browse
 {
     /// <summary>
     /// The new releases.
     /// </summary>
-    public class NewReleases
+    public class NewReleases : JsonObject
     {
         /// <summary>
-        /// Gets or sets the message.
-        /// </summary>
-        /// <value>
         /// The message.
-        /// </value>
-        [JsonProperty(PropertyName = "message")]
+        /// </summary>
+        [JsonPropertyName("message")]
         public string Message { get; set; }
 
         /// <summary>
-        /// Gets or sets the albums.
+        /// The albums page.
         /// </summary>
-        /// <value>
-        /// The albums.
-        /// </value>
-        [JsonProperty(PropertyName = "albums")]
-        public Page<SimpleAlbum> Albums { get; set; }
+        [JsonPropertyName("albums")]
+        public Page<SimplifiedAlbum> Albums { get; set; }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using FluentSpotifyApi.Model;
+using FluentSpotifyApi.Model.Artists;
 
 namespace FluentSpotifyApi.Builder.Artists
 {
@@ -25,10 +25,10 @@ namespace FluentSpotifyApi.Builder.Artists
         IArtistRelatedArtistsBuilder RelatedArtists { get; }
 
         /// <summary>
-        /// Get Spotify catalog information for a single artist identified by their unique Spotify ID.
+        /// Gets Spotify catalog information for a single artist identified by their unique Spotify ID.
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
-        Task<FullArtist> GetAsync(CancellationToken cancellationToken = default(CancellationToken));
+        Task<Artist> GetAsync(CancellationToken cancellationToken = default(CancellationToken));
     }
 }

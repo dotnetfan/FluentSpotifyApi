@@ -16,6 +16,7 @@ namespace FluentSpotifyApi.Expressions.Fields
         /// <param name="expression">
         /// The expression to be included.
         /// The indexer operator can be used to include array properties (e.g. <c>f => f.Items[0].Name</c>).
+        /// The cast operator can be used to reference properties of derived class. (e.g. <c>f => ((Derived)(f.Entity)).Description</c>).
         /// </param>
         /// <exception cref="System.ArgumentNullException">
         /// Thrown when <paramref name="expression"/> is null.
@@ -29,6 +30,7 @@ namespace FluentSpotifyApi.Expressions.Fields
         /// <param name="expression">
         /// The expression to be excluded.
         /// The indexer operator can be used to exclude array properties (e.g. <c>f => f.Items[0].Name</c>).
+        /// The cast operator can be used to reference properties of derived class. (e.g. <c>f => ((Derived)(f.Entity)).Description</c>).
         /// </param>
         /// <exception cref="System.ArgumentNullException">
         /// Thrown when <paramref name="expression"/> is null.

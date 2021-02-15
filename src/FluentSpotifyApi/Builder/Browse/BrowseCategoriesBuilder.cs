@@ -1,19 +1,20 @@
-﻿using System.Collections.Generic;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
-using FluentSpotifyApi.Model.Messages;
+using FluentSpotifyApi.Extensions;
+using FluentSpotifyApi.Model.Browse;
 
 namespace FluentSpotifyApi.Builder.Browse
 {
     internal class BrowseCategoriesBuilder : BuilderBase, IBrowseCategoriesBuilder
     {
-        public BrowseCategoriesBuilder(ContextData contextData, IEnumerable<object> routeValuesPrefix, string endpointName) : base(contextData, routeValuesPrefix, endpointName)
+        public BrowseCategoriesBuilder(BuilderBase parent)
+            : base(parent, "categories".Yield())
         {
         }
 
-        public Task<CategoriesPageMessage> GetAsync(string country, string locale, int limit, int offset, CancellationToken cancellationToken)
+        public Task<CategoriesPageResponse> GetAsync(string country, string locale, int? limit, int? offset, CancellationToken cancellationToken)
         {
-            return this.GetAsync<CategoriesPageMessage>(cancellationToken, queryStringParameters: new { limit, offset }, optionalQueryStringParameters: new { country, locale });
+            return this.GetAsync<CategoriesPageResponse>(cancellationToken, queryParams: new { country, locale, limit, offset });
         }
     }
 }

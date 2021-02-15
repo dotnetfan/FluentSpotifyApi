@@ -4,15 +4,15 @@
     <id>FluentSpotifyApi.AuthorizationFlows.UWP</id>
     <version>$packageVersion$</version>
     <authors>Patrik Gebrian</authors>
-	<owners>Patrik Gebrian</owners>
-    <licenseUrl>https://github.com/dotnetfan/FluentSpotifyApi/blob/master/LICENSE</licenseUrl>
+    <license type="expression">MIT</license>
+    <licenseUrl>https://licenses.nuget.org/MIT</licenseUrl>
     <projectUrl>https://github.com/dotnetfan/FluentSpotifyApi</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Implementation of Spotify authorization flows for UWP apps.</description>
     <tags>spotify, api, OAuth, UWP</tags>
     <dependencies>
-      <dependency id="FluentSpotifyApi.AuthorizationFlows" version="$packageVersion$" exclude="Build,Analyzers" />
-      <dependency id="Microsoft.NETCore.UniversalWindowsPlatform" version="5.4.0" exclude="Build,Analyzers" />
+      <dependency id="FluentSpotifyApi.AuthorizationFlows.Native" version="$packageVersion$" exclude="Build,Analyzers" />
+      <dependency id="Microsoft.NETCore.UniversalWindowsPlatform" version="6.2.11" exclude="Build,Analyzers" />
     </dependencies>    
   </metadata>
 </package>

@@ -3,38 +3,39 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentSpotifyApi.AuthorizationFlows.Core;
 using FluentSpotifyApi.AuthorizationFlows.Core.Client.Token;
-using FluentSpotifyApi.AuthorizationFlows.Core.Date;
 using FluentSpotifyApi.AuthorizationFlows.Core.Extensions;
 using FluentSpotifyApi.AuthorizationFlows.Core.Model;
-using FluentSpotifyApi.Core.Internal.Extensions;
-using FluentSpotifyApi.Core.Model;
+using FluentSpotifyApi.AuthorizationFlows.Core.Time;
+using FluentSpotifyApi.Core.User;
+using FluentSpotifyApi.Core.Utils;
 
 namespace FluentSpotifyApi.AuthorizationFlows.ClientCredentials
 {
     internal class AuthenticationTicketProvider : IAuthenticationTicketProvider, IDisposable
     {
-        private readonly ITokenHttpClient tokenHttpClient;
+        private readonly ISpotifyTokenClient tokenHttpClient;
 
-        private readonly IDateTimeOffsetProvider dateTimeOffsetProvider;
+        private readonly IClock clock;
 
         private readonly SemaphoreSlim semaphore;
 
         private AuthenticationTicket authenticationTicket;
 
-        public AuthenticationTicketProvider(ITokenHttpClient tokenHttpClient, IDateTimeOffsetProvider dateTimeOffsetProvider)
+        public AuthenticationTicketProvider(ISpotifyTokenClient tokenClient, IClock clock)
         {
-            this.tokenHttpClient = tokenHttpClient;
-            this.dateTimeOffsetProvider = dateTimeOffsetProvider;
+            this.tokenHttpClient = tokenClient;
+            this.clock = clock;
 
             this.semaphore = new SemaphoreSlim(1);
         }
 
-        public async Task<IAuthenticationTicket> GetAsync(CancellationToken cancellationToken)
+        public async Task<IAuthenticationTicket> GetAsync(bool ensureValidAccessToken, CancellationToken cancellationToken)
         {
-            var result = await this.semaphore.ExecuteAsync(
+            var result = await SpotifySemaphoreUtils.ExecuteAsync(
+                this.semaphore,
                 async innerCt =>
                 {
-                    if (this.authenticationTicket == null || !this.authenticationTicket.AccessToken.IsValid(this.dateTimeOffsetProvider))
+                    if (this.authenticationTicket == null || (ensureValidAccessToken && this.authenticationTicket.AccessToken.IsExpired(this.clock)))
                     {
                         await this.LoadAuthenticationTicketAsync(innerCt).ConfigureAwait(false);
                     }
@@ -48,16 +49,14 @@ namespace FluentSpotifyApi.AuthorizationFlows.ClientCredentials
 
         public async Task<IAuthenticationTicket> RenewAccessTokenAsync(IAuthenticationTicket currentAuthenticationTicket, CancellationToken cancellationToken)
         {
-            if (currentAuthenticationTicket == null)
-            {
-                throw new ArgumentNullException(nameof(currentAuthenticationTicket));
-            }
+            SpotifyArgumentAssertUtils.ThrowIfNull(currentAuthenticationTicket, nameof(currentAuthenticationTicket));
 
-            var result = await this.semaphore.ExecuteAsync(
+            var result = await SpotifySemaphoreUtils.ExecuteAsync(
+                this.semaphore,
                 async innerCt =>
                 {
                     if (this.authenticationTicket == null ||
-                        !this.authenticationTicket.AccessToken.IsValid(this.dateTimeOffsetProvider) || 
+                        this.authenticationTicket.AccessToken.IsExpired(this.clock) ||
                         this.authenticationTicket == currentAuthenticationTicket)
                     {
                         await this.LoadAuthenticationTicketAsync(innerCt).ConfigureAwait(false);
@@ -77,10 +76,8 @@ namespace FluentSpotifyApi.AuthorizationFlows.ClientCredentials
 
         private async Task LoadAuthenticationTicketAsync(CancellationToken cancellationToken)
         {
-            this.authenticationTicket = null;
-
             var accessToken = (await this.tokenHttpClient.GetAccessTokenFromClientCredentialsAsync(cancellationToken).ConfigureAwait(false))
-                .ToModelToken(this.dateTimeOffsetProvider);
+                .GetAccessTokenModel(this.clock);
 
             this.authenticationTicket = new AuthenticationTicket(accessToken);
         }

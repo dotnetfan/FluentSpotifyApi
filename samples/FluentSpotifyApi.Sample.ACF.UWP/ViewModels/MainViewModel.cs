@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Exceptions;
-using FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Native;
+using FluentSpotifyApi.AuthorizationFlows.Core.Client.Token.Exceptions;
+using FluentSpotifyApi.AuthorizationFlows.Native.AuthorizationCode;
 using FluentSpotifyApi.Core.Exceptions;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
@@ -11,15 +11,13 @@ namespace FluentSpotifyApi.Sample.ACF.UWP.ViewModels
 {
     public class MainViewModel : ViewModelBase
     {
-        private readonly IAuthenticationManager authenticationManager;
-
         private readonly IFluentSpotifyClient fluentSpotifyClient;
 
         private bool isLoading;
 
         private bool isLoaded;
 
-        private bool isLoadPlaylistsServiceError;
+        private bool isLoadPlaylistsCommunicationError;
 
         private bool isLoadPlaylistsCanceled;
 
@@ -33,7 +31,6 @@ namespace FluentSpotifyApi.Sample.ACF.UWP.ViewModels
 
         public MainViewModel(IAuthenticationManager authenticationManager, IFluentSpotifyClient fluentSpotifyClient)
         {
-            this.authenticationManager = authenticationManager;
             this.fluentSpotifyClient = fluentSpotifyClient;
 
             this.CancelableActionViewModel = new CancelableActionViewModel();
@@ -79,16 +76,16 @@ namespace FluentSpotifyApi.Sample.ACF.UWP.ViewModels
             }
         }
 
-        public bool IsLoadPlaylistsServiceError
+        public bool IsLoadPlaylistsCommunicationError
         {
             get
             {
-                return this.isLoadPlaylistsServiceError;
+                return this.isLoadPlaylistsCommunicationError;
             }
 
             set
             {
-                this.Set(() => this.IsLoadPlaylistsServiceError, ref this.isLoadPlaylistsServiceError, value);
+                this.Set(() => this.IsLoadPlaylistsCommunicationError, ref this.isLoadPlaylistsCommunicationError, value);
             }
         }
 
@@ -151,7 +148,7 @@ namespace FluentSpotifyApi.Sample.ACF.UWP.ViewModels
                             }
 
                             this.LoadPlaylistsCommand.Execute(null);
-                        }, 
+                        },
                         () => !this.IsLoading && !this.IsLoaded));
             }
         }
@@ -186,19 +183,19 @@ namespace FluentSpotifyApi.Sample.ACF.UWP.ViewModels
                                 {
                                     this.IsAccessRevoked = true;
                                 }
-                                catch (SpotifyServiceException)
+                                catch (SpotifyCommunicationException)
                                 {
-                                    this.IsLoadPlaylistsServiceError = true;
+                                    this.IsLoadPlaylistsCommunicationError = true;
                                 }
-                            });                           
-                        }, 
+                            });
+                        },
                         () => !this.CancelableActionViewModel.IsExecuting && !this.LoginViewModel.IsLoggingInOrLoggingOut && this.LoginViewModel.IsLoggedIn));
             }
         }
 
         private void CancelableActionViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(CancelableActionViewModel.IsExecuting))
+            if (e.PropertyName == nameof(this.CancelableActionViewModel.IsExecuting))
             {
                 this.LoadPlaylistsCommand.RaiseCanExecuteChanged();
             }
@@ -206,12 +203,12 @@ namespace FluentSpotifyApi.Sample.ACF.UWP.ViewModels
 
         private void LoginViewModel_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(LoginViewModel.IsLoggingInOrLoggingOut))
+            if (e.PropertyName == nameof(this.LoginViewModel.IsLoggingInOrLoggingOut))
             {
                 this.LoadPlaylistsCommand.RaiseCanExecuteChanged();
                 this.LoadPlaylistsCommand.Execute(null);
             }
-            else if (e.PropertyName == nameof(LoginViewModel.IsLoggedIn))
+            else if (e.PropertyName == nameof(this.LoginViewModel.IsLoggedIn))
             {
                 this.LoadPlaylistsCommand.RaiseCanExecuteChanged();
                 if (!this.LoginViewModel.IsLoggedIn)
@@ -224,7 +221,7 @@ namespace FluentSpotifyApi.Sample.ACF.UWP.ViewModels
         private void ResetPlaylists()
         {
             this.Playlists = null;
-            this.IsLoadPlaylistsServiceError = false;
+            this.IsLoadPlaylistsCommunicationError = false;
             this.IsLoadPlaylistsCanceled = false;
             this.IsAccessRevoked = false;
         }

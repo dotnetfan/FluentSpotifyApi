@@ -5,11 +5,11 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace FluentSpotifyApi.IntegrationTests.CCF
 {
     [TestClass]
-    public class BrowseTests : TestBase
+    public class BrowseTests : TestsBase
     {
         [TestMethod]
         [TestCategory(Settings.TestCategoryKey)]
-        public async Task ShouldGetFeaturedPlaylistsAsync()
+        public async Task ShouldGetFeaturedPlaylists()
         {
             // Arrange
             const int limit = 2;
@@ -23,7 +23,7 @@ namespace FluentSpotifyApi.IntegrationTests.CCF
 
         [TestMethod]
         [TestCategory(Settings.TestCategoryKey)]
-        public async Task ShouldGetNewReleasesAsync()
+        public async Task ShouldGetNewReleases()
         {
             // Arrange
             const int limit = 2;
@@ -37,13 +37,13 @@ namespace FluentSpotifyApi.IntegrationTests.CCF
 
         [TestMethod]
         [TestCategory(Settings.TestCategoryKey)]
-        public async Task ShouldGetCategoriesAsync()
+        public async Task ShouldGetCategories()
         {
             // Arrange
             const int limit = 2;
 
             // Act
-            var result = await this.Client.Browse.Categories.GetAsync(limit: limit);
+            var result = await this.Client.Browse.Categories().GetAsync(limit: limit);
 
             // Assert
             result.Page.Items.Should().HaveCount(limit);
@@ -51,13 +51,13 @@ namespace FluentSpotifyApi.IntegrationTests.CCF
 
         [TestMethod]
         [TestCategory(Settings.TestCategoryKey)]
-        public async Task ShouldGetCategoryAsync()
+        public async Task ShouldGetCategory()
         {
             // Arrange
             const string categoryId = "party";
 
             // Act
-            var result = await this.Client.Browse.Category(categoryId).GetAsync();
+            var result = await this.Client.Browse.Categories(categoryId).GetAsync();
 
             // Assert
             result.Id.Should().Be(categoryId);
@@ -65,13 +65,13 @@ namespace FluentSpotifyApi.IntegrationTests.CCF
 
         [TestMethod]
         [TestCategory(Settings.TestCategoryKey)]
-        public async Task ShouldGetCategoryPlaylistsAsync()
+        public async Task ShouldGetCategoryPlaylists()
         {
             // Arrange
             const int limit = 2;
 
             // Act
-            var result = await this.Client.Browse.Category("party").Playlists.GetAsync(country: "BR", limit: limit);
+            var result = await this.Client.Browse.Categories("party").Playlists.GetAsync(country: "BR", limit: limit);
 
             // Assert
             result.Page.Items.Should().HaveCount(limit);
@@ -79,13 +79,13 @@ namespace FluentSpotifyApi.IntegrationTests.CCF
 
         [TestMethod]
         [TestCategory(Settings.TestCategoryKey)]
-        public async Task ShouldGetRecommedationsAsync()
+        public async Task ShouldGetRecommedations()
         {
-            // Arrnage + Act
+            // Arrange + Act
             var result = await this.Client.Browse.Recommendations.GetAsync(
-                market: "US", 
-                seedArtists: new[] { "4NHQUGzhtTLFvgF5SZesLK" }, 
-                seedTracks: new[] { "0c6xIDDpzE81m2q797ordA" }, 
+                market: "US",
+                seedArtists: new[] { "4NHQUGzhtTLFvgF5SZesLK" },
+                seedTracks: new[] { "0c6xIDDpzE81m2q797ordA" },
                 buildTunableTrackAttributes: a => a.Energy(v => v.Min(0.5f)).Popularity(v => v.Min(50)));
 
             // Assert

@@ -2,36 +2,34 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using FluentSpotifyApi.Core.Internal.Extensions;
+using FluentSpotifyApi.Extensions;
 using FluentSpotifyApi.Model;
+using FluentSpotifyApi.Model.Albums;
 
 namespace FluentSpotifyApi.Builder.Artists
 {
     internal class ArtistAlbumsBuilder : BuilderBase, IArtistAlbumsBuilder
     {
-        public ArtistAlbumsBuilder(ContextData contextData, IEnumerable<object> routeValuesPrefix) : base(contextData, routeValuesPrefix, "albums")
+        public ArtistAlbumsBuilder(BuilderBase parent)
+            : base(parent, "albums".Yield())
         {
         }
 
-        public Task<Page<SimpleAlbum>> GetAsync(
-            IEnumerable<AlbumType> albumTypes, 
-            IEnumerable<string> dynamicAlbumTypes, 
-            string market, 
-            int limit, 
-            int offset,
+        public Task<Page<SimplifiedAlbum>> GetAsync(
+            IEnumerable<AlbumType> includeGroups,
+            string market,
+            int? limit,
+            int? offset,
             CancellationToken cancellationToken)
         {
-            return this.GetAsync<Page<SimpleAlbum>>(
+            return this.GetAsync<Page<SimplifiedAlbum>>(
                 cancellationToken,
-                queryStringParameters: new { limit, offset },
-                optionalQueryStringParameters: new
+                queryParams: new
                 {
-                    album_type = albumTypes == null && dynamicAlbumTypes == null 
-                        ? 
-                        null 
-                        : 
-                        string.Join(",", albumTypes.EmptyIfNull().Select(item => item.GetDescription()).Concat(dynamicAlbumTypes.EmptyIfNull()).Distinct()),
-                    market
+                    include_groups = includeGroups?.Select(item => item.GetEnumMemberValue()).JoinWithComma(),
+                    market,
+                    limit,
+                    offset
                 });
         }
     }

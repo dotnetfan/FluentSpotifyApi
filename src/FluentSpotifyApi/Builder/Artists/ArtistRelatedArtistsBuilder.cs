@@ -1,19 +1,20 @@
-﻿using System.Collections.Generic;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
-using FluentSpotifyApi.Model.Messages;
+using FluentSpotifyApi.Extensions;
+using FluentSpotifyApi.Model.Artists;
 
 namespace FluentSpotifyApi.Builder.Artists
 {
     internal class ArtistRelatedArtistsBuilder : BuilderBase, IArtistRelatedArtistsBuilder
     {
-        public ArtistRelatedArtistsBuilder(ContextData contextData, IEnumerable<object> routeValuesPrefix) : base(contextData, routeValuesPrefix, "related-artists")
+        public ArtistRelatedArtistsBuilder(BuilderBase parent)
+            : base(parent, "related-artists".Yield())
         {
         }
 
-        public Task<FullArtistsMessage> GetAsync(CancellationToken cancellationToken)
+        public Task<ArtistsResponse> GetAsync(CancellationToken cancellationToken)
         {
-            return this.GetAsync<FullArtistsMessage>(cancellationToken);
+            return this.GetAsync<ArtistsResponse>(cancellationToken);
         }
     }
 }

@@ -1,28 +1,37 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace FluentSpotifyApi.Builder.Browse
 {
-    internal class TuneableTrackAttributeBuilder<T> : ITuneableTrackAttributeBuilder<T> where T : struct
+    internal class TuneableTrackAttributeBuilder<TSource, TResult> : ITuneableTrackAttributeBuilder<TSource>
+        where TSource : struct
     {
-        private T? min;
+        private readonly Func<TSource, TResult> resultSelector;
 
-        private T? max;
+        private TSource? min;
 
-        private T? target;
+        private TSource? max;
 
-        public ITuneableTrackAttributeBuilder<T> Min(T value)
+        private TSource? target;
+
+        public TuneableTrackAttributeBuilder(Func<TSource, TResult> resultSelector)
+        {
+            this.resultSelector = resultSelector;
+        }
+
+        public ITuneableTrackAttributeBuilder<TSource> Min(TSource value)
         {
             this.min = value;
             return this;
         }
 
-        public ITuneableTrackAttributeBuilder<T> Max(T value)
+        public ITuneableTrackAttributeBuilder<TSource> Max(TSource value)
         {
             this.max = value;
             return this;
         }
 
-        public ITuneableTrackAttributeBuilder<T> Target(T value)
+        public ITuneableTrackAttributeBuilder<TSource> Target(TSource value)
         {
             this.target = value;
             return this;
@@ -30,9 +39,20 @@ namespace FluentSpotifyApi.Builder.Browse
 
         public IEnumerable<KeyValuePair<string, object>> GetValues(string attributeName)
         {
-            yield return new KeyValuePair<string, object>($"min_{attributeName}", this.min);
-            yield return new KeyValuePair<string, object>($"max_{attributeName}", this.max);
-            yield return new KeyValuePair<string, object>($"target_{attributeName}", this.target);
+            if (this.min != null)
+            {
+                yield return new KeyValuePair<string, object>($"min_{attributeName}", this.resultSelector(this.min.Value));
+            }
+
+            if (this.max != null)
+            {
+                yield return new KeyValuePair<string, object>($"max_{attributeName}", this.resultSelector(this.max.Value));
+            }
+
+            if (this.target != null)
+            {
+                yield return new KeyValuePair<string, object>($"target_{attributeName}", this.resultSelector(this.target.Value));
+            }
         }
     }
 }

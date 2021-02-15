@@ -1,7 +1,8 @@
 ﻿using System;
 using FluentAssertions;
 using FluentSpotifyApi.Expressions.Fields;
-using FluentSpotifyApi.Model;
+using FluentSpotifyApi.Model.Playlists;
+using FluentSpotifyApi.Model.Tracks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace FluentSpotifyApi.UnitTests.Expressions
@@ -13,10 +14,10 @@ namespace FluentSpotifyApi.UnitTests.Expressions
         public void ShouldGetFields()
         {
             // Arrange + Act
-            var result = FieldsProvider.Get<FullPlaylist>(builder => builder
-                .Exclude(playlist => playlist.Tracks.Items[0].Track.Album.Name)
-                .Exclude(playlist => playlist.Tracks.Items[0].Track.Album.Images)
-                .Exclude(playlist => playlist.Tracks.Items[0].Track.Artists[0].Id)
+            var result = FieldsProvider.Get<Playlist>(builder => builder
+                .Exclude(playlist => ((Track)playlist.Tracks.Items[0].Track).Album.Name)
+                .Exclude(playlist => ((Track)playlist.Tracks.Items[0].Track).Album.Images)
+                .Exclude(playlist => ((Track)playlist.Tracks.Items[0].Track).Artists[0].Id)
                 .Include(playlist => playlist.Name));
 
             // Assert
@@ -27,18 +28,18 @@ namespace FluentSpotifyApi.UnitTests.Expressions
         public void ShouldGetNullWhenThereIsNoExpression()
         {
             // Arrange + Act + Assert
-            FieldsProvider.Get<FullPlaylist>(builder => { }).Should().BeNull();
+            FieldsProvider.Get<Playlist>(builder => { }).Should().BeNull();
         }
 
         [TestMethod]
         public void ShouldReplaceExcludeWithInclude()
         {
             // Arrange + Act
-            var result = FieldsProvider.Get<FullPlaylist>(builder => builder
+            var result = FieldsProvider.Get<Playlist>(builder => builder
                 .Exclude(playlist => playlist.Images[0].Height)
-                .Exclude(playlist => playlist.Tracks.Items[0].Track.Popularity)
-                .Exclude(playlist => playlist.Tracks.Items[0].Track.IsPlayable)                
-                .Include(playlist => playlist.Tracks.Items[0].Track.Name));
+                .Exclude(playlist => ((Track)playlist.Tracks.Items[0].Track).Popularity)
+                .Exclude(playlist => ((Track)playlist.Tracks.Items[0].Track).IsPlayable)
+                .Include(playlist => ((Track)playlist.Tracks.Items[0].Track).Name));
 
             // Assert
             result.Should().Be("(images(!height),tracks(items(track(name))))");
@@ -48,10 +49,10 @@ namespace FluentSpotifyApi.UnitTests.Expressions
         public void ShouldReplaceIncludeWithExclude()
         {
             // Arrange + Act
-            var result = FieldsProvider.Get<FullPlaylist>(builder => builder
+            var result = FieldsProvider.Get<Playlist>(builder => builder
                 .Include(playlist => playlist.Images[0].Height)
-                .Include(playlist => playlist.Tracks.Items[0].Track.Popularity)
-                .Include(playlist => playlist.Tracks.Items[0].Track.Name)
+                .Include(playlist => ((Track)playlist.Tracks.Items[0].Track).Popularity)
+                .Include(playlist => ((Track)playlist.Tracks.Items[0].Track).Name)
                 .Exclude(playlist => playlist.Tracks.Items[0].Track));
 
             // Assert
@@ -62,10 +63,10 @@ namespace FluentSpotifyApi.UnitTests.Expressions
         public void ShouldThrowArgumentExceptionWhenExpressionIsInvalid()
         {
             // Arrange
-            Action action = () => FieldsProvider.Get<FullPlaylist>(builder => builder.Include<object>(playlist => null));
+            Action action = () => FieldsProvider.Get<Playlist>(builder => builder.Include<object>(playlist => null));
 
             // Act + Assert
-            action.ShouldThrow<ArgumentException>().Which.Message.Should().Be("The expression must be a member expression referencing the input parameter.");
+            action.Should().Throw<ArgumentException>().Which.Message.Should().Contain("The expression must be a member expression referencing the input parameter.");
         }
     }
 }

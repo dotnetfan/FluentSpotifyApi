@@ -1,22 +1,24 @@
-﻿namespace FluentSpotifyApi.Builder.Browse
+﻿#pragma warning disable SA1201 // Elements should appear in the correct order
+
+using FluentSpotifyApi.Extensions;
+
+namespace FluentSpotifyApi.Builder.Browse
 {
     internal class BrowseBuilder : BuilderBase, IBrowseBuilder
     {
-        public BrowseBuilder(ContextData contextData) : base(contextData, "browse")
+        public BrowseBuilder(RootBuilder root)
+            : base(root, "browse".Yield())
         {
         }
 
-        public IBrowseRecommendationsBuilder Recommendations => new BrowseRecommendationsBuilder(this.ContextData);
+        public IBrowseCategoriesBuilder Categories() => new BrowseCategoriesBuilder(this);
 
-        public IBrowseFeaturedPlaylistsBuilder FeaturedPlaylists => new BrowseFeaturedPlaylistsBuilder(this.ContextData, this.RouteValuesPrefix);
+        public IBrowseCategoryBuilder Categories(string id) => new BrowseCategoryBuilder(this, id);
 
-        public IBrowseNewReleasesBuilder NewReleases => new BrowseNewReleasesBuilder(this.ContextData, this.RouteValuesPrefix);
+        public IBrowseFeaturedPlaylistsBuilder FeaturedPlaylists => new BrowseFeaturedPlaylistsBuilder(this);
 
-        public IBrowseCategoriesBuilder Categories => BrowseCategoriesFactory.CreateCategoriesBuilder(this.ContextData, this.RouteValuesPrefix);
+        public IBrowseNewReleasesBuilder NewReleases => new BrowseNewReleasesBuilder(this);
 
-        public IBrowseCategoryBuilder Category(string id)
-        {
-            return BrowseCategoriesFactory.CreateCategoryBuilder(this.ContextData, this.RouteValuesPrefix, id);
-        }
+        public IBrowseRecommendationsBuilder Recommendations => new BrowseRecommendationsBuilder(this.CreateRootBuilder());
     }
 }

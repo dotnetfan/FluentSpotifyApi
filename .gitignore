@@ -286,8 +286,11 @@ __pycache__/
 *.btm.cs
 *.odx.cs
 *.xsd.cs
-/tests/FluentSpotifyApi.IntegrationTests.CCF/secrets.json
-/samples/FluentSpotifyApi.Sample.CCF.AspNetCore/secrets.json
-/samples/FluentSpotifyApi.Sample.ACF.AspNetCore/secrets.json
-/samples/FluentSpotifyApi.Sample.IGF.UWP/Assets/Secrets.resw
-/samples/FluentSpotifyApi.Sample.ACF.UWP/Assets/Secrets.resw
+
+# Genrated doc
+/_site/*
+/api/*
+
+# Secrets
+Secrets.resw
+secrets.json

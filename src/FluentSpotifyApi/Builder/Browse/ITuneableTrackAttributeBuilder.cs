@@ -10,21 +10,18 @@
         /// Sets min value.
         /// </summary>
         /// <param name="value">The value.</param>
-        /// <returns></returns>
         ITuneableTrackAttributeBuilder<T> Min(T value);
 
         /// <summary>
         /// Sets max value.
         /// </summary>
         /// <param name="value">The value.</param>
-        /// <returns></returns>
         ITuneableTrackAttributeBuilder<T> Max(T value);
 
         /// <summary>
         /// Sets target value.
         /// </summary>
         /// <param name="value">The value.</param>
-        /// <returns></returns>
         ITuneableTrackAttributeBuilder<T> Target(T value);
     }
 }

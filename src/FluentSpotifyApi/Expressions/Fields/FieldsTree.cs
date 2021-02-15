@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using FluentSpotifyApi.Core.Internal.Extensions;
 
 namespace FluentSpotifyApi.Expressions.Fields
 {
@@ -12,7 +11,7 @@ namespace FluentSpotifyApi.Expressions.Fields
         public FieldsTree()
         {
             this.root = new Node(string.Empty);
-        } 
+        }
 
         public void Add(IEnumerable<string> fieldsPath, bool isExclude)
         {
@@ -28,12 +27,12 @@ namespace FluentSpotifyApi.Expressions.Fields
                 {
                     node.IsExclude = isCurrentNodeExclude;
                     node.Children = null;
-                } 
+                }
 
-                var child = node.Children.EmptyIfNull().FirstOrDefault(item => item.FieldName == fieldName);
+                var child = (node.Children ?? Enumerable.Empty<Node>()).FirstOrDefault(item => item.FieldName == fieldName);
                 if (child == null)
                 {
-                    child = new Node(fieldName);                    
+                    child = new Node(fieldName);
                     (node.Children = node.Children ?? new List<Node>()).Add(child);
                 }
 
@@ -52,14 +51,14 @@ namespace FluentSpotifyApi.Expressions.Fields
             if (sb.Length == 0)
             {
                 return null;
-            } 
+            }
 
             return sb.ToString();
         }
 
         private IEnumerable<string> GetFieldsInternal(Node node)
         {
-            if (!node.Children.EmptyIfNull().Any())
+            if (!(node.Children ?? Enumerable.Empty<Node>()).Any())
             {
                 yield break;
             }
@@ -85,7 +84,7 @@ namespace FluentSpotifyApi.Expressions.Fields
                 {
                     yield return item;
                 }
- 
+
                 isFirst = false;
             }
 

@@ -26,7 +26,7 @@ namespace FluentSpotifyApi.Builder.Browse
         /// </summary>
         /// <param name="buildAttribute">The build attribute action.</param>
         /// <returns></returns>
-        ITuneableTrackAttributesBuilder DurationMs(Action<ITuneableTrackAttributeBuilder<int>> buildAttribute);
+        ITuneableTrackAttributesBuilder Duration(Action<ITuneableTrackAttributeBuilder<TimeSpan>> buildAttribute);
 
         /// <summary>
         /// Sets energy.
@@ -104,14 +104,5 @@ namespace FluentSpotifyApi.Builder.Browse
         /// <param name="buildAttribute">The build attribute action.</param>
         /// <returns></returns>
         ITuneableTrackAttributesBuilder Valence(Action<ITuneableTrackAttributeBuilder<float>> buildAttribute);
-
-        /// <summary>
-        /// Sets dynamic attribute.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="attributeName">Name of the attribute.</param>
-        /// <param name="buildAttribute">The build attribute action.</param>
-        /// <returns></returns>
-        ITuneableTrackAttributesBuilder DynamicAttribute<T>(string attributeName, Action<ITuneableTrackAttributeBuilder<T>> buildAttribute) where T : struct;
     }
 }

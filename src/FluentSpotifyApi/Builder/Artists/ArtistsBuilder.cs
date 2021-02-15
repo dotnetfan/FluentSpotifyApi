@@ -1,19 +1,20 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using FluentSpotifyApi.Model.Messages;
+using FluentSpotifyApi.Model.Artists;
 
 namespace FluentSpotifyApi.Builder.Artists
 {
     internal class ArtistsBuilder : EntitiesBuilderBase, IArtistsBuilder
     {
-        public ArtistsBuilder(ContextData contextData, string endpointName, IEnumerable<string> ids) : base(contextData, endpointName, ids)
+        public ArtistsBuilder(RootBuilder root, IEnumerable<string> ids)
+            : base(root, "artists", ids)
         {
         }
 
-        public async Task<FullArtistsMessage> GetAsync(CancellationToken cancellationToken)
+        public async Task<ArtistsResponse> GetAsync(CancellationToken cancellationToken)
         {
-            return await this.GetListAsync<FullArtistsMessage>(cancellationToken);
+            return await this.GetListAsync<ArtistsResponse>(cancellationToken);
         }
     }
 }

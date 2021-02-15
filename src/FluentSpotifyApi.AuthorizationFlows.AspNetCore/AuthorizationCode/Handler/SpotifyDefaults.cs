@@ -1,4 +1,8 @@
-﻿namespace FluentSpotifyApi.AuthorizationFlows.AspNetCore.AuthorizationCode.Handler
+﻿using FluentSpotifyApi.AuthorizationFlows.Core.Client.Authorization;
+using FluentSpotifyApi.AuthorizationFlows.Core.Client.Token;
+using FluentSpotifyApi.AuthorizationFlows.Core.Client.User;
+
+namespace FluentSpotifyApi.AuthorizationFlows.AspNetCore.AuthorizationCode.Handler
 {
     /// <summary>
     /// Default values for Spotify authentication.
@@ -16,23 +20,18 @@
         public const string DisplayName = "Spotify";
 
         /// <summary>
-        /// The user read email scope.
-        /// </summary>
-        public const string UserReadEmailScope = "user-read-email";
-
-        /// <summary>
         /// The URL for getting authorization from the Spotify Accounts Service.
         /// </summary>
-        public static readonly string AuthorizationEndpoint = "https://accounts.spotify.com/authorize";
+        public static readonly string AuthorizationEndpoint = SpotifyAuthorizationClientDefaults.AuthorizationEndpoint.AbsoluteUri;
 
         /// <summary>
         /// The URL for getting OAuth tokens from Spotify Accounts Service.
         /// </summary>
-        public static readonly string TokenEndpoint = "https://accounts.spotify.com/api/token";
+        public static readonly string TokenEndpoint = SpotifyTokenClientDefaults.TokenEndpoint.AbsoluteUri;
 
         /// <summary>
         /// The URL for getting info about current user.
         /// </summary>
-        public static readonly string UserInformationEndpoint = "https://api.spotify.com/v1/me";
+        public static readonly string UserInformationEndpoint = SpotifyUserClientDefaults.UserInformationEndpoint.AbsoluteUri;
     }
 }

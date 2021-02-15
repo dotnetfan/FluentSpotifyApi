@@ -1,21 +1,22 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using FluentSpotifyApi.Model.Messages;
+using FluentSpotifyApi.Model.Tracks;
 
 namespace FluentSpotifyApi.Builder.Tracks
 {
     internal class TracksBuilder : EntitiesBuilderBase, ITracksBuilder
     {
-        public TracksBuilder(ContextData contextData, string endpointName, IEnumerable<string> ids) : base(contextData, endpointName, ids)
+        public TracksBuilder(RootBuilder root, IEnumerable<string> ids)
+            : base(root, "tracks", ids)
         {
         }
 
-        public ITracksAudioFeaturesBuilder AudioFeatures => new TracksAudioFeaturesBuilder(ContextData, this.Sequence);
+        public ITracksAudioFeaturesBuilder AudioFeatures => new TracksAudioFeaturesBuilder(this.CreateRootBuilder(), this.Sequence);
 
-        public Task<FullTracksMessage> GetAsync(string market, CancellationToken cancellationToken)
+        public Task<TracksResponse> GetAsync(string market, CancellationToken cancellationToken)
         {
-            return this.GetListAsync<FullTracksMessage>(cancellationToken, optionalQueryStringParameters: new { market });
+            return this.GetListAsync<TracksResponse>(cancellationToken, queryParams: new { market });
         }
     }
 }

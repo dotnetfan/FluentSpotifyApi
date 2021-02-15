@@ -5,18 +5,18 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace FluentSpotifyApi.IntegrationTests.CCF
 {
-    [TestClass]    
-    public class AlbumsTests : TestBase
+    [TestClass]
+    public class AlbumsTests : TestsBase
     {
         [TestMethod]
         [TestCategory(Settings.TestCategoryKey)]
-        public async Task ShouldGetAlbumByIdAsync()
+        public async Task ShouldGetAlbum()
         {
             // Arrange
             const string id = "6akEvsycLGftJxYudPjmqK";
 
             // Act
-            var result = await this.Client.Album(id).GetAsync();
+            var result = await this.Client.Albums(id).GetAsync();
 
             // Assert
             result.Id.Should().Be(id);
@@ -24,7 +24,7 @@ namespace FluentSpotifyApi.IntegrationTests.CCF
 
         [TestMethod]
         [TestCategory(Settings.TestCategoryKey)]
-        public async Task ShouldGetAlbumsByIdsAsync()
+        public async Task ShouldGetAlbums()
         {
             // Arrange
             var ids = new[] { "41MnTivkwTO3UUJ8DrqEJJ", "6JWc4iAiJ9FjyK0B59ABb4", "6UXCm6bOO4gFlDQZV5yL37" };
@@ -38,14 +38,14 @@ namespace FluentSpotifyApi.IntegrationTests.CCF
 
         [TestMethod]
         [TestCategory(Settings.TestCategoryKey)]
-        public async Task ShouldGetAlbumTracksByIdAsync()
+        public async Task ShouldGetAlbumTracks()
         {
             // Arrange
             const string id = "6akEvsycLGftJxYudPjmqK";
             const int limit = 2;
 
             // Act
-            var result = await this.Client.Album(id).Tracks.GetAsync(limit: limit);
+            var result = await this.Client.Albums(id).Tracks.GetAsync(limit: limit);
 
             // Assert
             result.Items.Should().HaveCount(limit);

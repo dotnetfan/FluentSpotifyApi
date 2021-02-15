@@ -8,7 +8,6 @@
         /// <summary>
         /// Gets CSRF token.
         /// </summary>
-        /// <returns></returns>
         string Get();
     }
 }

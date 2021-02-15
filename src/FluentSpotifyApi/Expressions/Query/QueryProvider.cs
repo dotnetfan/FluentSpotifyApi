@@ -1,11 +1,11 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using FluentSpotifyApi.Core.Internal.Extensions;
+using FluentSpotifyApi.Core.Utils;
+using FluentSpotifyApi.Extensions;
 
 namespace FluentSpotifyApi.Expressions.Query
 {
@@ -41,15 +41,8 @@ namespace FluentSpotifyApi.Expressions.Query
         /// </exception>
         public static string Get<TInput>(Expression<Func<TInput, bool>> predicate, QueryOptions queryOptions)
         {
-            if (predicate == null)
-            {
-                throw new ArgumentNullException(nameof(predicate));
-            }
-
-            if (queryOptions == null)
-            {
-                throw new ArgumentNullException(nameof(queryOptions));
-            }
+            SpotifyArgumentAssertUtils.ThrowIfNull(predicate, nameof(predicate));
+            SpotifyArgumentAssertUtils.ThrowIfNull(queryOptions, nameof(queryOptions));
 
             return new QueryProviderHelper<TInput>(predicate, queryOptions).Get();
         }
@@ -101,7 +94,7 @@ namespace FluentSpotifyApi.Expressions.Query
                         {
                             if (i + 2 >= list.Count || !(list[i] is BinaryExpression left) || !(list[i + 1] is ExpressionType expressionType) || !(list[i + 2] is BinaryExpression right))
                             {
-                                throw new ArgumentException($"Range must be the following sequence: BinaryExpression, ExpressionType, BinaryExpression.");
+                                throw new ArgumentException($"Range must be the following sequence: BinaryExpression, ExpressionType, BinaryExpression.", nameof(expression));
                             }
 
                             term = this.ProcessRangeExpression(left, expressionType, right);
@@ -114,7 +107,7 @@ namespace FluentSpotifyApi.Expressions.Query
                         }
                         else
                         {
-                            throw new ArgumentException($"Unsupported expression of type '{expression.GetType()}' has been found.");
+                            throw new ArgumentException($"Unsupported expression of type '{expression.GetType()}' has been found.", nameof(expression));
                         }
 
                         sb.Append(term);
@@ -133,12 +126,12 @@ namespace FluentSpotifyApi.Expressions.Query
                                 sb.Append($"{NotOperator} ");
                                 break;
                             default:
-                                throw new ArgumentException($"Unsupported expression type '{expressionType}' has been found.");
+                                throw new ArgumentException($"Unsupported expression type '{expressionType}' has been found.", nameof(expressionType));
                         }
                     }
                     else
                     {
-                        throw new ArgumentException($"Unsupported item of type '{item?.GetType()}' has been found.");
+                        throw new ArgumentException($"Unsupported item of type '{item?.GetType()}' has been found.", nameof(item));
                     }
                 }
 
@@ -160,7 +153,7 @@ namespace FluentSpotifyApi.Expressions.Query
                 }
                 else
                 {
-                    throw new ArgumentException("One of the equal expression operands must be a query field.");
+                    throw new ArgumentException("One of the equal expression operands must be a query field.", nameof(expression));
                 }
 
                 var value = this.GetValue(valueExpression);
@@ -168,11 +161,11 @@ namespace FluentSpotifyApi.Expressions.Query
                 string stringValue;
                 if (value is Enum enumValue)
                 {
-                    stringValue = enumValue.GetDescription();
+                    stringValue = enumValue.GetEnumMemberValue();
                 }
                 else
                 {
-                    stringValue = value.ToInvariantString();
+                    stringValue = SpotifyObjectUtils.ConvertToCanonicalString(value);
                 }
 
                 if (value == null || value is string)
@@ -228,7 +221,7 @@ namespace FluentSpotifyApi.Expressions.Query
             {
                 if (expressionType != ExpressionType.AndAlso)
                 {
-                    throw new ArgumentException("Only range expressions with 'AndAlso' operator are supported.");
+                    throw new ArgumentException("Only range expressions with 'AndAlso' operator are supported.", nameof(expressionType));
                 }
 
                 var leftBound = this.ProcessBoundExpression(left);
@@ -244,7 +237,7 @@ namespace FluentSpotifyApi.Expressions.Query
                     throw new ArgumentException("Range bound expressions must define a range.");
                 }
 
-                var range = string.Join("-", new[] { leftBound, rightBound }.OrderBy(item => item.IsLower).Select(item => item.Value.ToInvariantString()));
+                var range = string.Join("-", new[] { leftBound, rightBound }.OrderBy(item => item.IsLower).Select(item => SpotifyObjectUtils.ConvertToCanonicalString(item.Value)));
 
                 return this.GetTerm(leftBound.QueryField, range);
             }
@@ -263,7 +256,7 @@ namespace FluentSpotifyApi.Expressions.Query
                 }
                 else
                 {
-                    throw new ArgumentException("Only bound expressions with 'GreaterThanOrEqual' or 'LessThanOrEqual' operators are supported.");
+                    throw new ArgumentException("Only bound expressions with 'GreaterThanOrEqual' or 'LessThanOrEqual' operators are supported.", nameof(expression));
                 }
 
                 Expression valueExpression;
@@ -290,10 +283,10 @@ namespace FluentSpotifyApi.Expressions.Query
             {
                 if (!this.TryGetQueryField(expression.Object, out string queryField))
                 {
-                    throw new ArgumentException("The Contains call object expression must be a query field.");
+                    throw new ArgumentException("The Contains call object expression must be a query field.", nameof(expression));
                 }
 
-                var stringValue = this.GetValue(expression.Arguments.First()).ToInvariantString();
+                var stringValue = SpotifyObjectUtils.ConvertToCanonicalString(this.GetValue(expression.Arguments.First()));
 
                 if (this.queryOptions.RemoveSpecialCharacters)
                 {
@@ -316,7 +309,7 @@ namespace FluentSpotifyApi.Expressions.Query
                                 sb.Append($"{NotOperator} ");
                             }
                         }
-                        
+
                         sb.Append(this.GetTerm(queryField, Operators.Contains(word, StringComparer.OrdinalIgnoreCase) ? word.ToLower() : word));
 
                         isFirst = false;
@@ -341,7 +334,7 @@ namespace FluentSpotifyApi.Expressions.Query
 
                 if (this.TryGetAsInputMember(expression, out MemberExpression member))
                 {
-                    queryField = member.Member.GetCustomAttribute<DescriptionAttribute>()?.Description;
+                    queryField = member.Member.GetCustomAttribute<QueryFieldAttribute>()?.Name;
                     return true;
                 }
 

@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace FluentSpotifyApi.AuthorizationFlows.AspNetCore.AuthorizationCode.Handler
 {
     /// <summary>
-    /// The set of <see cref="AuthenticationBuilder"/> extensions
+    /// The set of <see cref="AuthenticationBuilder"/> extensions.
     /// </summary>
     public static class SpotifyExtensions
     {
@@ -16,8 +16,8 @@ namespace FluentSpotifyApi.AuthorizationFlows.AspNetCore.AuthorizationCode.Handl
         /// <returns></returns>
         public static AuthenticationBuilder AddSpotify(this AuthenticationBuilder builder)
             => builder.AddSpotify(
-                SpotifyDefaults.AuthenticationScheme, 
-                o => 
+                SpotifyDefaults.AuthenticationScheme,
+                o =>
                 {
                 });
 

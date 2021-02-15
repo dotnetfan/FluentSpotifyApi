@@ -1,4 +1,4 @@
-﻿using FluentSpotifyApi.Core.Model;
+﻿using FluentSpotifyApi.Core.User;
 
 namespace FluentSpotifyApi.AuthorizationFlows.Core.Model
 {
@@ -10,17 +10,11 @@ namespace FluentSpotifyApi.AuthorizationFlows.Core.Model
         /// <summary>
         /// Gets the user.
         /// </summary>
-        /// <value>
-        /// The user.
-        /// </value>
         IUser User { get; }
 
         /// <summary>
         /// Gets the access token.
         /// </summary>
-        /// <value>
-        /// The access token.
-        /// </value>
         AccessToken AccessToken { get; }
     }
 }

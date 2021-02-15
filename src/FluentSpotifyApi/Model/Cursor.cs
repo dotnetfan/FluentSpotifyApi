@@ -1,28 +1,17 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
+using FluentSpotifyApi.Core.Model;
 
 namespace FluentSpotifyApi.Model
 {
     /// <summary>
     /// The cursor.
     /// </summary>
-    public class Cursor
+    public class Cursor : JsonObject
     {
         /// <summary>
-        /// Gets or sets the before.
+        /// The cursor to use as key to find the next page of items.
         /// </summary>
-        /// <value>
-        /// The before.
-        /// </value>
-        [JsonProperty(PropertyName = "before")]
-        public string Before { get; set; }
-
-        /// <summary>
-        /// Gets or sets the after.
-        /// </summary>
-        /// <value>
-        /// The after.
-        /// </value>
-        [JsonProperty(PropertyName = "after")]
+        [JsonPropertyName("after")]
         public string After { get; set; }
     }
 }

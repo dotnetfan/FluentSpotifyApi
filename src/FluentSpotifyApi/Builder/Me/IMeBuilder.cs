@@ -1,6 +1,10 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using FluentSpotifyApi.Builder.User.Playlists;
+using FluentSpotifyApi.Builder.Me.Following;
+using FluentSpotifyApi.Builder.Me.Library;
+using FluentSpotifyApi.Builder.Me.Personalization;
+using FluentSpotifyApi.Builder.Me.Player;
+using FluentSpotifyApi.Builder.Users;
 using FluentSpotifyApi.Core.Model;
 
 namespace FluentSpotifyApi.Builder.Me
@@ -11,17 +15,17 @@ namespace FluentSpotifyApi.Builder.Me
     public interface IMeBuilder
     {
         /// <summary>
-        /// Gets builder for "me/albums" and "me/tracks" endpoints.
-        /// These endpoints are used for retrieving information about, and managing, tracks and albums 
-        /// that the current user has saved in their “Your Music” library.
-        /// </summary>
-        ILibraryBuilder Library { get; }
-
-        /// <summary>
         /// Gets builder for "me/top" and "me/player" endpoints.
         /// These endpoints are used for retrieving information about the user’s listening habits.
         /// </summary>
         IPersonalizationBuilder Personalization { get; }
+
+        /// <summary>
+        /// Gets builder for "me/albums" and "me/tracks" endpoints.
+        /// These endpoints are used for retrieving information about, and managing, tracks and albums
+        /// that the current user has saved in their “Your Music” library.
+        /// </summary>
+        ILibraryBuilder Library { get; }
 
         /// <summary>
         /// Gets builder for "me/following" and "users/{ownerId}/playlists/{playlistId}/followers" endpoints.
@@ -32,7 +36,7 @@ namespace FluentSpotifyApi.Builder.Me
         /// <summary>
         /// Gets builder for "users/{myUserId}/playlists" endpoint.
         /// </summary>
-        IPlaylistsBuilder Playlists { get; }
+        IUserPlaylistsBuilder Playlists { get; }
 
         /// <summary>
         /// Gets builder for "me/player" endpoint.
@@ -41,13 +45,7 @@ namespace FluentSpotifyApi.Builder.Me
         IPlayerBuilder Player { get; }
 
         /// <summary>
-        /// Gets builder for "users/{myUserId}/playlists/{id}" endpoint.
-        /// </summary>
-        /// <param name="id">The identifier.</param>
-        IPlaylistBuilder Playlist(string id);
-
-        /// <summary>
-        /// Get detailed profile information about the current user (including the current user’s username).
+        /// Gets detailed profile information about the current user (including the current user’s username).
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>
         Task<PrivateUser> GetAsync(CancellationToken cancellationToken = default(CancellationToken));

@@ -1,4 +1,6 @@
-﻿namespace FluentSpotifyApi.Builder.Browse
+﻿#pragma warning disable SA1201 // Elements should appear in the correct order
+
+namespace FluentSpotifyApi.Builder.Browse
 {
     /// <summary>
     /// The builder for "browse" endpoints that are used for getting playlists and new album releases
@@ -6,6 +8,17 @@
     /// </summary>
     public interface IBrowseBuilder
     {
+        /// <summary>
+        /// Gets builder for "browse/categories" endpoint.
+        /// </summary>
+        IBrowseCategoriesBuilder Categories();
+
+        /// <summary>
+        /// Gets builder for "categories/{id}" endpoint.
+        /// </summary>
+        /// <param name="id">The category ID.</param>
+        IBrowseCategoryBuilder Categories(string id);
+
         /// <summary>
         /// Gets builder for "browse/featured-playlists" endpoint.
         /// </summary>
@@ -17,19 +30,8 @@
         IBrowseNewReleasesBuilder NewReleases { get; }
 
         /// <summary>
-        /// Gets builder for "browse/categories" endpoint.
-        /// </summary>
-        IBrowseCategoriesBuilder Categories { get; }
-
-        /// <summary>
         /// Gets builder for "recommendations" endpoint.
         /// </summary>
         IBrowseRecommendationsBuilder Recommendations { get; }
-
-        /// <summary>
-        /// Gets builder for "categories/{id}" endpoint.
-        /// </summary>
-        /// <param name="id">The category ID.</param>
-        IBrowseCategoryBuilder Category(string id);
     }
 }

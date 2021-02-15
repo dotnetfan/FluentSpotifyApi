@@ -1,19 +1,20 @@
-﻿using System.Collections.Generic;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
-using FluentSpotifyApi.Model.Messages;
+using FluentSpotifyApi.Extensions;
+using FluentSpotifyApi.Model.Player;
 
 namespace FluentSpotifyApi.Builder.Me.Player
 {
     internal class DevicesBuilder : BuilderBase, IDevicesBuilder
     {
-        public DevicesBuilder(ContextData contextData, IEnumerable<object> routeValuesPrefix, string endpointName) : base(contextData, routeValuesPrefix, endpointName)
+        public DevicesBuilder(BuilderBase parent)
+            : base(parent, "devices".Yield())
         {
         }
 
-        public Task<DevicesMessage> GetAsync(CancellationToken cancellationToken)
+        public Task<DevicesResponse> GetAsync(CancellationToken cancellationToken)
         {
-            return this.GetAsync<DevicesMessage>(cancellationToken, additionalRouteValues: new[] { "devices" });
+            return this.GetAsync<DevicesResponse>(cancellationToken);
         }
     }
 }

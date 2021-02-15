@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using FluentSpotifyApi.Model.Messages;
+using FluentSpotifyApi.Model.Albums;
 
 namespace FluentSpotifyApi.Builder.Albums
 {
@@ -10,11 +10,11 @@ namespace FluentSpotifyApi.Builder.Albums
     public interface IAlbumsBuilder
     {
         /// <summary>
-        /// Get Spotify catalog information for multiple albums identified by their Spotify IDs.
+        /// Gets Spotify catalog information for multiple albums identified by their Spotify IDs.
         /// </summary>
-        /// <param name="market">An ISO 3166-1 alpha-2 country code.</param>
+        /// <param name="market">An ISO 3166-1 alpha-2 country code or the string <c>from_token</c>. Provide this parameter if you want to apply Track Relinking.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
-        Task<FullAlbumsMessage> GetAsync(string market = null, CancellationToken cancellationToken = default(CancellationToken));
+        Task<AlbumsResponse> GetAsync(string market = null, CancellationToken cancellationToken = default(CancellationToken));
     }
 }

@@ -1,37 +1,28 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace FluentSpotifyApi.Core.Model
 {
     /// <summary>
     /// The image.
     /// </summary>
-    public class Image
+    public class Image : JsonObject
     {
         /// <summary>
-        /// Gets or sets the height.
+        /// The image height in pixels. If unknown: null or not returned.
         /// </summary>
-        /// <value>
-        /// The height.
-        /// </value>
-        [JsonProperty(PropertyName = "height")]
+        [JsonPropertyName("height")]
         public int? Height { get; set; }
 
         /// <summary>
-        /// Gets or sets the URL.
+        /// The source URL of the image.
         /// </summary>
-        /// <value>
-        /// The URL.
-        /// </value>
-        [JsonProperty(PropertyName = "url")]
+        [JsonPropertyName("url")]
         public string Url { get; set; }
 
         /// <summary>
-        /// Gets or sets the width.
+        /// The image width in pixels. If unknown: null or not returned.
         /// </summary>
-        /// <value>
-        /// The width.
-        /// </value>
-        [JsonProperty(PropertyName = "width")]
+        [JsonPropertyName("width")]
         public int? Width { get; set; }
     }
 }

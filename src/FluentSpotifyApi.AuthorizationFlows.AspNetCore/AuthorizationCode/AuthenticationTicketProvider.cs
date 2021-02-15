@@ -1,65 +1,52 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using FluentSpotifyApi.AuthorizationFlows.AspNetCore.AuthorizationCode.Extensions;
-using FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Server.Extensions;
+using FluentSpotifyApi.AuthorizationFlows.AspNetCore.AuthorizationCode.Utils;
 using FluentSpotifyApi.AuthorizationFlows.Core;
 using FluentSpotifyApi.AuthorizationFlows.Core.Client.Token;
-using FluentSpotifyApi.AuthorizationFlows.Core.Date;
+using FluentSpotifyApi.AuthorizationFlows.Core.Exceptions;
 using FluentSpotifyApi.AuthorizationFlows.Core.Extensions;
 using FluentSpotifyApi.AuthorizationFlows.Core.Model;
-using FluentSpotifyApi.Core.Internal.Extensions;
-using FluentSpotifyApi.Core.Model;
-using FluentSpotifyApi.Core.Options;
+using FluentSpotifyApi.AuthorizationFlows.Core.Time;
+using FluentSpotifyApi.Core.User;
+using FluentSpotifyApi.Core.Utils;
 using Microsoft.AspNetCore.Authentication;
 
 namespace FluentSpotifyApi.AuthorizationFlows.AspNetCore.AuthorizationCode
 {
     internal class AuthenticationTicketProvider : IAuthenticationTicketProvider
     {
-        private const string RefreshTokenKey = "refresh_token";
-
-        private const string AccessTokenKey = "access_token";
-
-        private const string ExpiresAtKey = "expires_at";
-
         private readonly IAuthenticationManager authenticationManager;
 
-        private readonly IDateTimeOffsetProvider dateTimeOffsetProvider;
+        private readonly IClock clock;
 
-        private readonly ITokenHttpClient tokenHttpClient;
-
-        private readonly IOptionsProvider<AspNetCoreAuthorizationCodeFlowOptions> optionsProvider;
+        private readonly ISpotifyTokenClient tokenClient;
 
         private readonly ISemaphoreProvider semaphoreProvider;
 
         public AuthenticationTicketProvider(
-            IAuthenticationManager authenticationManager, 
-            IDateTimeOffsetProvider dateTimeOffsetProvider,
-            ITokenHttpClient tokenHttpClient,
-            IOptionsProvider<AspNetCoreAuthorizationCodeFlowOptions> optionsProvider,
-            ISemaphoreProvider semaphoreProvider) 
+            IAuthenticationManager authenticationManager,
+            IClock clock,
+            ISpotifyTokenClient tokenClient,
+            ISemaphoreProvider semaphoreProvider)
         {
             this.authenticationManager = authenticationManager;
-            this.dateTimeOffsetProvider = dateTimeOffsetProvider;
-            this.tokenHttpClient = tokenHttpClient;
-            this.optionsProvider = optionsProvider;
+            this.clock = clock;
+            this.tokenClient = tokenClient;
             this.semaphoreProvider = semaphoreProvider;
         }
 
-        public async Task<IAuthenticationTicket> GetAsync(CancellationToken cancellationToken)
+        public async Task<IAuthenticationTicket> GetAsync(bool ensureValidAccessToken, CancellationToken cancellationToken)
         {
-            this.ValidateOptionsMapping();
-
-            var result = await this.semaphoreProvider.Get().ExecuteAsync(
+            var result = await SpotifySemaphoreUtils.ExecuteAsync(
+                this.semaphoreProvider.Get(),
                 async innerCt =>
                 {
                     var authenticateResult = await this.authenticationManager.GetAsync(innerCt).ConfigureAwait(false);
                     var authenticationTicket = new AuthenticationTicket(authenticateResult);
 
-                    if (!authenticationTicket.AccessToken.IsValid(this.dateTimeOffsetProvider))
+                    if (ensureValidAccessToken && authenticationTicket.AccessToken.IsExpired(this.clock))
                     {
                         authenticationTicket = await this.GetNewAccessTokenAsync(authenticationTicket, authenticateResult, innerCt).ConfigureAwait(false);
                     }
@@ -73,9 +60,8 @@ namespace FluentSpotifyApi.AuthorizationFlows.AspNetCore.AuthorizationCode
 
         public async Task<IAuthenticationTicket> RenewAccessTokenAsync(IAuthenticationTicket currentAuthenticationTicket, CancellationToken cancellationToken)
         {
-            this.ValidateOptionsMapping();
-
-            var result = await this.semaphoreProvider.Get().ExecuteAsync(
+            var result = await SpotifySemaphoreUtils.ExecuteAsync(
+                this.semaphoreProvider.Get(),
                 async innerCt =>
                 {
                     var authenticateResult = await this.authenticationManager.GetAsync(innerCt).ConfigureAwait(false);
@@ -90,44 +76,31 @@ namespace FluentSpotifyApi.AuthorizationFlows.AspNetCore.AuthorizationCode
 
         private async Task<AuthenticationTicket> GetNewAccessTokenAsync(AuthenticationTicket authenticationTicket, IAuthenticateResult authenticateResult, CancellationToken cancellationToken)
         {
-            var accessTokenDto = await this.tokenHttpClient
-                    .GetAccessTokenOrThrowInvalidRefreshTokenExceptionAsync(authenticationTicket.RefreshToken, cancellationToken)
-                    .ConfigureAwait(false);
+            var accessTokenResponse = await this.tokenClient.GetAccessTokenFromRefreshTokenAsync(authenticationTicket.RefreshToken, cancellationToken).ConfigureAwait(false);
 
-            var accessToken = accessTokenDto.ToModelToken(this.dateTimeOffsetProvider);
-
-            authenticateResult.Properties.UpdateTokenValue(AccessTokenKey, accessToken.Token);
-            authenticateResult.Properties.UpdateTokenValue(ExpiresAtKey, accessToken.ExpiresAt.ToString("o", CultureInfo.InvariantCulture));
+            var accessToken = accessTokenResponse.GetAccessTokenModel(this.clock);
+            authenticateResult.Properties.UpdateTokenValue(TokenNames.AccessToken, accessToken.Token);
+            authenticateResult.Properties.UpdateTokenValue(TokenNames.ExpiresAt, accessToken.ExpiresAt.ToString("o", CultureInfo.InvariantCulture));
 
             await this.authenticationManager.UpdateAsync(authenticateResult, cancellationToken).ConfigureAwait(false);
 
             return new AuthenticationTicket(authenticateResult);
         }
 
-        private void ValidateOptionsMapping()
-        {
-            // Gets options to ensure they are correctly mapped to the underlying Spotify Options.
-            this.optionsProvider.Get();
-        }
-
         private class AuthenticationTicket : IAuthenticationTicket
         {
             public AuthenticationTicket(IAuthenticateResult authenticateResult)
             {
-                var refreshToken = authenticateResult.Properties.GetTokenValue(RefreshTokenKey);
-                var accessToken = authenticateResult.Properties.GetTokenValue(AccessTokenKey);
-                var expiresAt = authenticateResult.Properties.GetTokenValue(ExpiresAtKey);
-
-                if (string.IsNullOrEmpty(refreshToken) || string.IsNullOrEmpty(accessToken) || string.IsNullOrEmpty(expiresAt))
+                if (!SpotifyRequiredTokensUtils.TryGet(authenticateResult.Properties, out var tokens))
                 {
-                    throw new InvalidOperationException("Authentication tokens were not found.");
+                    throw new SpotifyMalformedAuthenticationTicketException("Unable to get authentication tokens.");
                 }
 
-                this.RefreshToken = refreshToken;
+                this.RefreshToken = tokens.Value.RefreshToken;
 
                 this.AccessToken = new AccessToken(
-                    accessToken,
-                    DateTimeOffset.ParseExact(expiresAt, "o", CultureInfo.InvariantCulture));
+                    tokens.Value.AccessToken,
+                    tokens.Value.ExpiresAt);
 
                 this.User = new PrincipalUser(authenticateResult.Principal);
             }
@@ -142,11 +115,9 @@ namespace FluentSpotifyApi.AuthorizationFlows.AspNetCore.AuthorizationCode
             {
                 public PrincipalUser(ClaimsPrincipal claimsPrincipal)
                 {
-                    var userId = claimsPrincipal.GetNameIdentifier();
-
-                    if (string.IsNullOrEmpty(userId))
+                    if (!SpotifyRequiredClaimsUtils.TryGet(claimsPrincipal, out var userId))
                     {
-                        throw new InvalidOperationException("User ID was not found.");
+                        throw new SpotifyMalformedAuthenticationTicketException("Unable to get User ID.");
                     }
 
                     this.Id = userId;

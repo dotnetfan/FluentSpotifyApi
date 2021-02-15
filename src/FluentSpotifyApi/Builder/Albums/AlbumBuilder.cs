@@ -1,20 +1,21 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using FluentSpotifyApi.Model;
+using FluentSpotifyApi.Model.Albums;
 
 namespace FluentSpotifyApi.Builder.Albums
 {
     internal class AlbumBuilder : EntityBuilderBase, IAlbumBuilder
     {
-        public AlbumBuilder(ContextData contextData, string endpointName, string id) : base(contextData, endpointName, id)
+        public AlbumBuilder(RootBuilder root, string id)
+            : base(root, "albums", id)
         {
         }
 
-        public IAlbumTracksBuilder Tracks => new AlbumTracksBuilder(this.ContextData, this.RouteValuesPrefix);
+        public IAlbumTracksBuilder Tracks => new AlbumTracksBuilder(this);
 
-        public Task<FullAlbum> GetAsync(string market, CancellationToken cancellationToken)
+        public Task<Album> GetAsync(string market, CancellationToken cancellationToken)
         {
-            return this.GetAsync<FullAlbum>(cancellationToken, optionalQueryStringParameters: new { market });
+            return this.GetAsync<Album>(cancellationToken, queryParams: new { market });
         }
     }
 }

@@ -1,10 +1,11 @@
 ﻿using System.Diagnostics;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
-using FluentSpotifyApi.AuthorizationFlows.AspNetCore.AuthorizationCode.Extensions;
 using FluentSpotifyApi.Sample.ACF.AspNetCore.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace FluentSpotifyApi.Sample.ACF.AspNetCore.Controllers
 {
@@ -22,31 +23,29 @@ namespace FluentSpotifyApi.Sample.ACF.AspNetCore.Controllers
             return this.View();
         }
 
-        public IActionResult About()
+        public IActionResult Privacy()
         {
-            this.ViewData["Message"] = "Your application description page.";
-
             return this.View();
         }
 
-        public IActionResult Contact()
+        public IActionResult UserProfile()
         {
-            this.ViewData["Message"] = "Your contact page.";
-
             return this.View();
         }
 
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
-            return this.View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return this.View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? this.HttpContext.TraceIdentifier });
         }
 
         [Authorize]
         public async Task<IActionResult> Playlists()
         {
-            var userId = this.User.GetNameIdentifier();
+            var userId = this.User.FindFirst(ClaimTypes.NameIdentifier).Value;
 
-            var model = (await this.fluentSpotifyClient.Me.Playlists.GetAsync(limit: 20, offset: 0))
+            var playlists = (await this.fluentSpotifyClient.Me.Playlists.GetAsync(limit: 20, offset: 0));
+            var model = playlists
                 .Items
                 .Select(item => new PlaylistListItemModel
                 {

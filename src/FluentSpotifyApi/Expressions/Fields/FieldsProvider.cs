@@ -1,4 +1,5 @@
 ﻿using System;
+using FluentSpotifyApi.Core.Utils;
 
 namespace FluentSpotifyApi.Expressions.Fields
 {
@@ -17,6 +18,8 @@ namespace FluentSpotifyApi.Expressions.Fields
         /// </exception>
         public static string Get<TInput>(Action<IFieldsBuilder<TInput>> buildFields)
         {
+            SpotifyArgumentAssertUtils.ThrowIfNull(buildFields, nameof(buildFields));
+
             var fieldsBuilder = new FieldsBuilder<TInput>();
             buildFields(fieldsBuilder);
             return fieldsBuilder.GetFields();

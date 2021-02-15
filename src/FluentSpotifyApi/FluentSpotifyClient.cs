@@ -1,58 +1,72 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using FluentSpotifyApi.Builder;
 using FluentSpotifyApi.Builder.Albums;
 using FluentSpotifyApi.Builder.Artists;
 using FluentSpotifyApi.Builder.Browse;
+using FluentSpotifyApi.Builder.Episodes;
 using FluentSpotifyApi.Builder.Me;
+using FluentSpotifyApi.Builder.Playlists;
 using FluentSpotifyApi.Builder.Search;
+using FluentSpotifyApi.Builder.Shows;
 using FluentSpotifyApi.Builder.Tracks;
-using FluentSpotifyApi.Builder.User;
-using FluentSpotifyApi.Client;
-using FluentSpotifyApi.Core.Client;
-using FluentSpotifyApi.Core.Options;
-using FluentSpotifyApi.Options;
+using FluentSpotifyApi.Builder.Users;
+using FluentSpotifyApi.Core.User;
+using FluentSpotifyApi.Core.Utils;
+
+#pragma warning disable SA1201 // Elements should appear in the correct order
 
 namespace FluentSpotifyApi
 {
     internal class FluentSpotifyClient : IFluentSpotifyClient
     {
-        private readonly ISpotifyHttpClient spotifyHttpClient;
-
         private readonly ContextData contextData;
+        private readonly BuilderBase.RootBuilder rootBuilder;
 
-        public FluentSpotifyClient(ISpotifyHttpClient spotifyHttpClient, IOptionsProvider<FluentSpotifyClientOptions> fluentSpotifyClientOptionsProvider)
+        public FluentSpotifyClient(IFluentSpotifyHttpClientFactory httpClientFactory, ICurrentUserProvider currentUserProvider)
         {
-            this.contextData = new ContextData(spotifyHttpClient, fluentSpotifyClientOptionsProvider);
-            this.spotifyHttpClient = spotifyHttpClient;
+            this.contextData = new ContextData(httpClientFactory, currentUserProvider);
+            this.rootBuilder = new BuilderBase.RootBuilder(this.contextData);
         }
 
-        public IBrowseBuilder Browse => new BrowseBuilder(this.contextData);
+        public IArtistBuilder Artists(string id) => new ArtistBuilder(this.rootBuilder, id);
 
-        public IMeBuilder Me => new Builder.Me.Builder(this.contextData);
+        public IArtistsBuilder Artists(IEnumerable<string> ids) => new ArtistsBuilder(this.rootBuilder, ids);
 
-        public ISearchBuilder Search => new SearchBuilder(this.contextData);
+        public IAlbumBuilder Albums(string id) => new AlbumBuilder(this.rootBuilder, id);
 
-        public IAlbumBuilder Album(string id) => Builder.Albums.Factory.CreateAlbumBuilder(this.contextData, id);
+        public IAlbumsBuilder Albums(IEnumerable<string> ids) => new AlbumsBuilder(this.rootBuilder, ids);
 
-        public IAlbumsBuilder Albums(IEnumerable<string> ids) => Builder.Albums.Factory.CreateAlbumsBuilder(this.contextData, ids);
+        public ITrackBuilder Tracks(string id) => new TrackBuilder(this.rootBuilder, id);
 
-        public IArtistBuilder Artist(string id) => Builder.Artists.Factory.CreateArtistBuilder(this.contextData, id);
+        public ITracksBuilder Tracks(IEnumerable<string> ids) => new TracksBuilder(this.rootBuilder, ids);
 
-        public IArtistsBuilder Artists(IEnumerable<string> ids) => Builder.Artists.Factory.CreateArtistsBuilder(this.contextData, ids);
+        public IShowBuilder Shows(string id) => new ShowBuilder(this.rootBuilder, id);
 
-        public ITrackBuilder Track(string id) => Builder.Tracks.Factory.CreateTrackBuilder(this.contextData, id);
+        public IShowsBuilder Shows(IEnumerable<string> ids) => new ShowsBuilder(this.rootBuilder, ids);
 
-        public ITracksBuilder Tracks(IEnumerable<string> ids) => Builder.Tracks.Factory.CreateTracksBuilder(this.contextData, ids);
+        public IEpisodeBuilder Episodes(string id) => new EpisodeBuilder(this.rootBuilder, id);
 
-        public IUserBuilder User(string id) => new Builder.User.UserBuilder(this.contextData, id);
+        public IEpisodesBuilder Episodes(IEnumerable<string> ids) => new EpisodesBuilder(this.rootBuilder, ids);
 
-        public Task<T> GetAsync<T>(Uri url, CancellationToken cancellationToken)
+        public IPlaylistBuilder Playlists(string id) => new PlaylistBuilder(this.rootBuilder, id);
+
+        public IBrowseBuilder Browse => new BrowseBuilder(this.rootBuilder);
+
+        public ISearchBuilder Search => new SearchBuilder(this.rootBuilder);
+
+        public IMeBuilder Me => new MeBuilder(this.rootBuilder);
+
+        public IUserBuilder Users(string id) => new UserBuilder(this.rootBuilder, id);
+
+        public async Task<T> GetAsync<T>(Uri url, CancellationToken cancellationToken)
         {
-            return this.contextData.SpotifyHttpClient.SendAsync<T>(new UriParts { BaseUri = url }, HttpMethod.Get, null, null, cancellationToken);
+            return await SpotifyHttpUtils.HandleTimeoutAsync<IFluentSpotifyClient, T>(
+                async innerCt => await this.contextData.HttpClientFactory.CreateClient().GetFromJsonAsync<T>(url, innerCt).ConfigureAwait(false),
+                cancellationToken).ConfigureAwait(false);
         }
     }
 }

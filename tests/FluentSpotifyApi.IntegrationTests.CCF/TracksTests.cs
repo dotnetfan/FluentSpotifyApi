@@ -6,17 +6,17 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace FluentSpotifyApi.IntegrationTests.CCF
 {
     [TestClass]
-    public class TracksTests : TestBase
+    public class TracksTests : TestsBase
     {
         [TestMethod]
         [TestCategory(Settings.TestCategoryKey)]
-        public async Task ShouldGetTrackByIdAsync()
+        public async Task ShouldGetTrack()
         {
             // Arrange
             const string id = "3n3Ppam7vgaVa1iaRUc9Lp";
 
             // Act
-            var result = await this.Client.Track(id).GetAsync();
+            var result = await this.Client.Tracks(id).GetAsync();
 
             // Assert
             result.Id.Should().Be(id);
@@ -24,7 +24,7 @@ namespace FluentSpotifyApi.IntegrationTests.CCF
 
         [TestMethod]
         [TestCategory(Settings.TestCategoryKey)]
-        public async Task ShouldGetTracksByIdsAsync()
+        public async Task ShouldGetTracks()
         {
             // Arrange
             var ids = new[] { "3n3Ppam7vgaVa1iaRUc9Lp", "3twNvmDtFQtAd5gMKedhLD" };
@@ -38,13 +38,13 @@ namespace FluentSpotifyApi.IntegrationTests.CCF
 
         [TestMethod]
         [TestCategory(Settings.TestCategoryKey)]
-        public async Task ShouldGetTrackAudioAnalysisByIdAsync()
+        public async Task ShouldGetTrackAudioAnalysis()
         {
             // Arrange
             const string id = "3JIxjvbbDrA9ztYlNcp3yL";
 
             // Act
-            var result = await this.Client.Track(id).AudioAnalysis.GetAsync();
+            var result = await this.Client.Tracks(id).AudioAnalysis.GetAsync();
 
             // Assert
             result.Track.Should().NotBeNull();
@@ -52,13 +52,13 @@ namespace FluentSpotifyApi.IntegrationTests.CCF
 
         [TestMethod]
         [TestCategory(Settings.TestCategoryKey)]
-        public async Task ShouldGetTrackAudioFeaturesByIdAsync()
+        public async Task ShouldGetTrackAudioFeatures()
         {
             // Arrange
             const string id = "06AKEBrKUckW0KREUWRnvT";
 
             // Act
-            var result = await this.Client.Track(id).AudioFeatures.GetAsync();
+            var result = await this.Client.Tracks(id).AudioFeatures.GetAsync();
 
             // Assert
             result.Id.Should().Be(id);
@@ -66,7 +66,7 @@ namespace FluentSpotifyApi.IntegrationTests.CCF
 
         [TestMethod]
         [TestCategory(Settings.TestCategoryKey)]
-        public async Task ShouldGetTracksAudioFeaturesByIdsAsync()
+        public async Task ShouldGetTracksAudioFeatures()
         {
             // Arrange
             var ids = new[] { "4JpKVNYnVcJ8tuMKjAj50A", "2NRANZE9UCmPAS5XVbXL40", "24JygzOLM0EmRQeGtFcIcG" };

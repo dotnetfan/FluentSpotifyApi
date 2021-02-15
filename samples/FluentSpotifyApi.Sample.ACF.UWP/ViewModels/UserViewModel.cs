@@ -1,19 +1,18 @@
-﻿using FluentSpotifyApi.Core.Model;
+﻿using FluentSpotifyApi.AuthorizationFlows.Native.AuthorizationCode;
 using GalaSoft.MvvmLight;
 
 namespace FluentSpotifyApi.Sample.ACF.UWP.ViewModels
 {
     public class UserViewModel : ViewModelBase
     {
-        private readonly PrivateUser privateUser;
-
-        public UserViewModel(PrivateUser privateUser)
+        public UserViewModel(UserClaims userClaims)
         {
-            this.privateUser = privateUser;
+            this.Id = userClaims[UserClaimTypes.Id].Value;
+            this.DisplayName = (userClaims.GetClaimOrDefault(UserClaimTypes.DisplayName) ?? userClaims[UserClaimTypes.Id]).Value;
         }
 
-        public string Id => this.privateUser.Id;
+        public string Id { get; }
 
-        public string DisplayName => (string.IsNullOrEmpty(this.privateUser.DisplayName) ? this.privateUser.Id : this.privateUser.DisplayName);
+        public string DisplayName { get; }
     }
 }

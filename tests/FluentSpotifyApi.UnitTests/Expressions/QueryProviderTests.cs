@@ -1,9 +1,11 @@
 ﻿using System;
-using System.Diagnostics.CodeAnalysis;
 using FluentAssertions;
 using FluentSpotifyApi.Builder.Search;
 using FluentSpotifyApi.Expressions.Query;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+#pragma warning disable SA1131 // Use readable conditions
+#pragma warning disable SA1408 // Conditional expressions should declare precedence
 
 namespace FluentSpotifyApi.UnitTests.Expressions
 {
@@ -21,8 +23,6 @@ namespace FluentSpotifyApi.UnitTests.Expressions
         }
 
         [TestMethod]
-        [SuppressMessage("Microsoft.StyleCop.CSharp.MaintainabilityRules", "SA1408:ConditionalExpressionsMustDeclarePrecedence", Justification = "Expression tests")]
-        [SuppressMessage("Microsoft.StyleCop.CSharp.ReadabilityRules", "SA1131:UseReadableConditions", Justification = "Expression tests")]
         public void ShouldGetQueryFromAPredicate()
         {
             // Arrange
@@ -80,7 +80,7 @@ namespace FluentSpotifyApi.UnitTests.Expressions
                 f =>
                     f.Artist.Contains("part1 part2 part3") &&
                     !f.Album.Contains("me OR my") &&
-                    f.Track.Contains("    ") && 
+                    f.Track.Contains("    ") &&
                     f.Any.Contains("any1 any2   any3"),
                 new QueryOptions { NormalizePartialMatch = true });
 
@@ -93,8 +93,8 @@ namespace FluentSpotifyApi.UnitTests.Expressions
         {
             // Arrange + Act + Assert
             ((Action)(() => QueryProvider.Get<QueryFields>(f => !(f.Album == "test album" && f.Artist == "test artist"))))
-                .ShouldThrow<ArgumentException>()
-                .Which.Message.Should().Match("Unsupported NOT expression operand of type '*' has been found.");
+                .Should().Throw<ArgumentException>()
+                .Which.Message.Should().Match("*Unsupported NOT expression operand of type '*' has been found.*");
         }
 
         [TestMethod]
@@ -102,8 +102,8 @@ namespace FluentSpotifyApi.UnitTests.Expressions
         {
             // Arrange + Act + Assert
             ((Action)(() => QueryProvider.Get<QueryFields>(f => f.Album == "test album" | f.Artist == "test artist")))
-                .ShouldThrow<ArgumentException>()
-                .Which.Message.Should().Match("Unsupported expression of type '*' has been found.");
+                .Should().Throw<ArgumentException>()
+                .Which.Message.Should().Match("*Unsupported expression of type '*' has been found.*");
         }
 
         [TestMethod]
@@ -111,8 +111,8 @@ namespace FluentSpotifyApi.UnitTests.Expressions
         {
             // Arrange + Act + Assert
             ((Action)(() => QueryProvider.Get<QueryFields>(f => f == null)))
-                .ShouldThrow<ArgumentException>()
-                .Which.Message.Should().Match("One of the equal expression operands must be a query field.");
+                .Should().Throw<ArgumentException>()
+                .Which.Message.Should().Contain("One of the equal expression operands must be a query field.");
         }
 
         [TestMethod]
@@ -120,29 +120,29 @@ namespace FluentSpotifyApi.UnitTests.Expressions
         {
             // Arrange + Act + Assert
             ((Action)(() => QueryProvider.Get<QueryFields>(f => f.Album == "test album" && f.Year >= 2015)))
-                .ShouldThrow<ArgumentException>()
-                .Which.Message.Should().Be("Range must be the following sequence: BinaryExpression, ExpressionType, BinaryExpression.");
+                .Should().Throw<ArgumentException>()
+                .Which.Message.Should().Contain("Range must be the following sequence: BinaryExpression, ExpressionType, BinaryExpression.");
 
             ((Action)(() => QueryProvider.Get<QueryFields>(f => f.Album == "test album" && f.Year >= 2015 && f.Year < 2017)))
-                .ShouldThrow<ArgumentException>()
-                .Which.Message.Should().Be("Only bound expressions with 'GreaterThanOrEqual' or 'LessThanOrEqual' operators are supported.");
+                .Should().Throw<ArgumentException>()
+                .Which.Message.Should().Contain("Only bound expressions with 'GreaterThanOrEqual' or 'LessThanOrEqual' operators are supported.");
 
             var value = 123;
             ((Action)(() => QueryProvider.Get<QueryFields>(f => f.Album == "test album" && value >= 2015 && f.Year <= 2017)))
-                .ShouldThrow<ArgumentException>()
-                .Which.Message.Should().Be("One of the bound expression operands must be a query field.");
+                .Should().Throw<ArgumentException>()
+                .Which.Message.Should().Contain("One of the bound expression operands must be a query field.");
 
             ((Action)(() => QueryProvider.Get<QueryFields>(f => f.Album == "test album" && (f.Year >= 2015 || f.Year <= 2017))))
-                .ShouldThrow<ArgumentException>()
-                .Which.Message.Should().Be("Only range expressions with 'AndAlso' operator are supported.");
+                .Should().Throw<ArgumentException>()
+                .Which.Message.Should().Contain("Only range expressions with 'AndAlso' operator are supported.");
 
             ((Action)(() => QueryProvider.Get<TestQueryFields>(f => f.Album == "test album" && f.TestValue >= 2015 && f.Year <= 2017)))
-                .ShouldThrow<ArgumentException>()
-                .Which.Message.Should().Be("Both range bound expressions must reference the same query field.");
+                .Should().Throw<ArgumentException>()
+                .Which.Message.Should().Contain("Both range bound expressions must reference the same query field.");
 
             ((Action)(() => QueryProvider.Get<QueryFields>(f => f.Album == "test album" && f.Year >= 2015 && f.Year >= 2017)))
-                .ShouldThrow<ArgumentException>()
-                .Which.Message.Should().Be("Range bound expressions must define a range.");
+                .Should().Throw<ArgumentException>()
+                .Which.Message.Should().Contain("Range bound expressions must define a range.");
         }
 
         [TestMethod]
@@ -150,8 +150,8 @@ namespace FluentSpotifyApi.UnitTests.Expressions
         {
             // Arrange + Act + Assert
             ((Action)(() => QueryProvider.Get<QueryFields>(f => "test".Contains("e"))))
-                .ShouldThrow<ArgumentException>()
-                .Which.Message.Should().Match("The Contains call object expression must be a query field.");
+                .Should().Throw<ArgumentException>()
+                .Which.Message.Should().Contain("The Contains call object expression must be a query field.");
         }
 
         private class TestQueryFields : QueryFields

@@ -1,129 +1,226 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Json;
+using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
-using FluentSpotifyApi.Core.Client;
-using FluentSpotifyApi.Core.Internal;
-using FluentSpotifyApi.Core.Internal.Extensions;
-using FluentSpotifyApi.Core.Model;
+using FluentSpotifyApi.Core.Utils;
+using FluentSpotifyApi.Serialization;
 
 namespace FluentSpotifyApi.Builder
 {
-    internal class BuilderBase
+    internal abstract class BuilderBase
     {
-        protected static readonly ITransformer UserTransformer = new Transformer<IUser>(user => user.Id);
+        private static readonly JsonSerializerOptions JsonOptions;
 
-        protected readonly ContextData ContextData;
+        private readonly ContextData contextData;
 
-        protected readonly object[] RouteValuesPrefix;
+        private readonly IList<object> routeValues;
 
-        public BuilderBase(ContextData contextData, IEnumerable<object> routeValuesPrefix, string endpointName) : this(contextData, routeValuesPrefix, endpointName, null)
+        static BuilderBase()
         {
-        }
-
-        public BuilderBase(ContextData contextData, string endpointName) : this(contextData, null, endpointName, null)
-        {
-        }
-
-        public BuilderBase(ContextData contextData, IEnumerable<object> routeValuesPrefix, string endpointName, IEnumerable<object> routeValuesSuffix)
-        {
-            this.ContextData = contextData;
-            this.RouteValuesPrefix = routeValuesPrefix.EmptyIfNull().Concat(endpointName.Yield()).Concat(routeValuesSuffix.EmptyIfNull()).ToArray();
-        }
-
-        protected Task<TResult> GetAsync<TResult>(
-            CancellationToken cancellationToken, 
-            object queryStringParameters = null, 
-            object optionalQueryStringParameters = null, 
-            IEnumerable<object> additionalRouteValues = null)
-        {
-            return this.SendAsync<TResult>(
-                HttpMethod.Get, 
-                cancellationToken, 
-                queryStringParameters, 
-                optionalQueryStringParameters, 
-                additionalRouteValues);
-        }
-
-        protected Task<TResult> SendAsync<TResult>(
-            HttpMethod httpMethod, 
-            CancellationToken cancellationToken, 
-            object queryStringParameters = null, 
-            object optionalQueryStringParameters = null,
-            IEnumerable<object> additionalRouteValues = null)
-        {
-            return this.ContextData.SpotifyHttpClient.SendAsync<TResult>(
-                this.GetUriParts(queryStringParameters, optionalQueryStringParameters, additionalRouteValues),
-                httpMethod,                
-                null,
-                null,
-                cancellationToken);
-        }
-
-        protected Task<TResult> SendAsync<TResult, TRequestBody>(
-            HttpMethod httpMethod, 
-            TRequestBody requestBody, 
-            CancellationToken cancellationToken, 
-            object queryStringParameters = null, 
-            object optionalQueryStringParameters = null, 
-            IEnumerable<object> additionalRouteValues = null)
-        {
-            return this.ContextData.SpotifyHttpClient.SendWithJsonBodyAsync<TResult, TRequestBody>(
-                this.GetUriParts(queryStringParameters, optionalQueryStringParameters, additionalRouteValues),                
-                httpMethod,                                                
-                null,
-                requestBody,
-                cancellationToken);
-        }
-
-        protected Task<TResult> SendAsync<TResult>(
-            HttpMethod httpMethod,
-            Func<CancellationToken, Task<Stream>> streamProvider,
-            string streamContentType,
-            CancellationToken cancellationToken,
-            object queryStringParameters = null,
-            object optionalQueryStringParameters = null,
-            IEnumerable<object> additionalRouteValues = null)
-        {
-            return this.ContextData.SpotifyHttpClient.SendWithStreamBodyAsync<TResult>(
-                this.GetUriParts(queryStringParameters, optionalQueryStringParameters, additionalRouteValues),
-                httpMethod,
-                null,
-                streamProvider,
-                streamContentType,
-                cancellationToken);
-        }
-
-        private static object CombineParameters(object parameters, object optionalParameters)
-        {
-            var optionalPropertyBag = SpotifyObjectHelpers.GetPropertyBag(optionalParameters).Where(item => item.Value != null).ToList();
-
-            if (optionalPropertyBag.Any())
+            JsonOptions = new JsonSerializerOptions
             {
-                return new { parameters = parameters, optionalParameters = optionalPropertyBag };
-            }
-            else
-            {
-                return parameters;
-            }
-        }
-
-        private object[] CombineRouteValues(IEnumerable<object> additionalRouteValues)
-        {
-            return this.RouteValuesPrefix.Concat(additionalRouteValues.EmptyIfNull()).ToArray();
-        }
-
-        private UriParts GetUriParts(object queryStringParameters, object optionalQueryStringParameters, IEnumerable<object> additionalRouteValues)
-        {
-            return new UriParts
-            {
-                BaseUri = this.ContextData.FluentSpotifyClientOptionsProvider.Get().WebApiEndpoint,
-                QueryStringParameters = CombineParameters(queryStringParameters, optionalQueryStringParameters),
-                RouteValues = this.CombineRouteValues(additionalRouteValues),
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             };
+            JsonOptions.Converters.Add(new EntityConverter());
+        }
+
+        public BuilderBase(BuilderBase parent)
+            : this(parent, Enumerable.Empty<object>())
+        {
+        }
+
+        public BuilderBase(BuilderBase parent, IEnumerable<object> routeValues)
+        {
+            SpotifyArgumentAssertUtils.ThrowIfNull(parent, nameof(parent));
+            SpotifyArgumentAssertUtils.ThrowIfNull(routeValues, nameof(routeValues));
+
+            this.contextData = parent.contextData;
+            this.routeValues = parent.routeValues.Concat(routeValues).ToList();
+        }
+
+        private BuilderBase(ContextData contextData)
+        {
+            this.contextData = contextData;
+            this.routeValues = Array.Empty<object>();
+        }
+
+        protected RootBuilder CreateRootBuilder() => new RootBuilder(this.contextData);
+
+        protected async Task<TResult> GetAsync<TResult>(
+            CancellationToken cancellationToken,
+            IEnumerable<object> additionalRouteValues = null,
+            object queryParams = null)
+        {
+            var relativeUri = await this.GetRelativeUriAsync(additionalRouteValues, queryParams, cancellationToken).ConfigureAwait(false);
+
+            return await SpotifyHttpUtils.HandleTimeoutAsync<IFluentSpotifyClient, TResult>(
+                async innerCt => await this.contextData.HttpClientFactory.CreateClient().GetFromJsonAsync<TResult>(relativeUri, JsonOptions, innerCt).ConfigureAwait(false),
+                cancellationToken).ConfigureAwait(false);
+        }
+
+        protected async Task SendAsync(
+            HttpMethod httpMethod,
+            CancellationToken cancellationToken,
+            IEnumerable<object> additionalRouteValues = null,
+            object queryParams = null)
+        {
+            var relativeUri = await this.GetRelativeUriAsync(additionalRouteValues, queryParams, cancellationToken).ConfigureAwait(false);
+            using (var request = new HttpRequestMessage(httpMethod, relativeUri))
+            {
+                await SpotifyHttpUtils.HandleTimeoutAsync<IFluentSpotifyClient>(
+                    async innerCt => (await this.contextData.HttpClientFactory.CreateClient().SendAsync(request, innerCt).ConfigureAwait(false)).Dispose(),
+                    cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        protected async Task<TResult> SendBodyAsync<TRequestBody, TResult>(
+            HttpMethod httpMethod,
+            TRequestBody requestBody,
+            CancellationToken cancellationToken,
+            IEnumerable<object> additionalRouteValues = null,
+            object queryParams = null)
+        {
+            var relativeUri = await this.GetRelativeUriAsync(additionalRouteValues, queryParams, cancellationToken).ConfigureAwait(false);
+            var content = JsonContent.Create(requestBody, options: JsonOptions);
+
+            using (var request = new HttpRequestMessage(httpMethod, relativeUri))
+            {
+                request.Content = content;
+
+                return await SpotifyHttpUtils.HandleTimeoutAsync<IFluentSpotifyClient, TResult>(
+                    async innerCt =>
+                    {
+                        using (var response = await this.contextData.HttpClientFactory.CreateClient().SendAsync(request, innerCt).ConfigureAwait(false))
+                        {
+                            return await response.Content.ReadFromJsonAsync<TResult>(JsonOptions, innerCt).ConfigureAwait(false);
+                        }
+                    },
+                    cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        protected async Task SendBodyAsync<TRequestBody>(
+            HttpMethod httpMethod,
+            TRequestBody requestBody,
+            CancellationToken cancellationToken,
+            IEnumerable<object> additionalRouteValues = null,
+            object queryParams = null)
+        {
+            var relativeUri = await this.GetRelativeUriAsync(additionalRouteValues, queryParams, cancellationToken).ConfigureAwait(false);
+            var content = JsonContent.Create(requestBody, options: JsonOptions);
+
+            using (var request = new HttpRequestMessage(httpMethod, relativeUri))
+            {
+                request.Content = content;
+
+                await SpotifyHttpUtils.HandleTimeoutAsync<IFluentSpotifyClient>(
+                    async innerCt => (await this.contextData.HttpClientFactory.CreateClient().SendAsync(request, innerCt).ConfigureAwait(false)).Dispose(),
+                    cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        protected async Task SendJpegAsync(
+            HttpMethod httpMethod,
+            byte[] jpeg,
+            CancellationToken cancellationToken,
+            IEnumerable<object> additionalRouteValues = null,
+            object queryParams = null)
+        {
+            var relativeUri = await this.GetRelativeUriAsync(additionalRouteValues, queryParams, cancellationToken).ConfigureAwait(false);
+            var content = new StringContent(Convert.ToBase64String(jpeg));
+            content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/jpeg");
+
+            using (var request = new HttpRequestMessage(httpMethod, relativeUri))
+            {
+                request.Content = content;
+
+                await SpotifyHttpUtils.HandleTimeoutAsync<IFluentSpotifyClient>(
+                    async innerCt => (await this.contextData.HttpClientFactory.CreateClient().SendAsync(request, innerCt).ConfigureAwait(false)).Dispose(),
+                    cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        private async Task<Uri> GetRelativeUriAsync(IEnumerable<object> additionalRouteValues, object queryParams, CancellationToken cancellationToken)
+        {
+            var routeValues = this.routeValues.Concat(additionalRouteValues ?? Enumerable.Empty<object>()).ToList();
+            var destructuredQueryParams = this.DestructureQueryParamsObjectRecursively(queryParams).Where(item => item.Value != null).ToList();
+
+            bool transformRouteValues = false;
+            bool transformQueryParamters = false;
+            if ((transformRouteValues = routeValues.Any(x => x is CurrentUserIdPlaceholder)) || (transformQueryParamters = destructuredQueryParams.Any(x => x.Value is CurrentUserIdPlaceholder)))
+            {
+                var currentUser = await this.contextData.CurrentUserProvider.GetAsync(cancellationToken).ConfigureAwait(false);
+
+                if (transformRouteValues)
+                {
+                    routeValues = routeValues.Select(x => x is CurrentUserIdPlaceholder ? currentUser.Id : x).ToList();
+                }
+
+                if (transformQueryParamters)
+                {
+                    destructuredQueryParams = destructuredQueryParams
+                        .Select(x => x.Value is CurrentUserIdPlaceholder ? new KeyValuePair<string, object>(x.Key, currentUser.Id) : x)
+                        .ToList();
+                }
+            }
+
+            var result = SpotifyUriUtils.GetRelativeUri(routeValues, destructuredQueryParams);
+            return result;
+        }
+
+        private IEnumerable<KeyValuePair<string, object>> DestructureQueryParamsObjectRecursively(object value)
+        {
+            if (value == null)
+            {
+                yield break;
+            }
+
+            var type = value.GetType();
+
+            foreach (var property in type.GetProperties())
+            {
+                var propertyValue = property.GetValue(value);
+
+                if (typeof(IEnumerable<KeyValuePair<string, object>>).GetTypeInfo().IsAssignableFrom(property.PropertyType))
+                {
+                    foreach (var item in (IEnumerable<KeyValuePair<string, object>>)propertyValue)
+                    {
+                        yield return item;
+                    }
+                }
+                else if (typeof(KeyValuePair<string, object>).GetTypeInfo().IsAssignableFrom(property.PropertyType))
+                {
+                    yield return (KeyValuePair<string, object>)propertyValue;
+                }
+                else if (property.PropertyType == typeof(string) ||
+                        property.PropertyType.IsValueType ||
+                        property.PropertyType == typeof(Uri) ||
+                        property.PropertyType == typeof(CurrentUserIdPlaceholder))
+                {
+                    yield return new KeyValuePair<string, object>(property.Name, propertyValue);
+                }
+                else
+                {
+                    foreach (var item in this.DestructureQueryParamsObjectRecursively(propertyValue))
+                    {
+                        yield return item;
+                    }
+                }
+            }
+        }
+
+        public sealed class RootBuilder : BuilderBase
+        {
+            public RootBuilder(ContextData contextData)
+                : base(contextData)
+            {
+            }
         }
     }
 }

@@ -1,28 +1,24 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
+using FluentSpotifyApi.Core.Model;
+using FluentSpotifyApi.Model.Tracks;
 
 namespace FluentSpotifyApi.Model.Browse
 {
     /// <summary>
     /// The recommendations.
     /// </summary>
-    public class Recommendations
+    public class Recommendations : JsonObject
     {
         /// <summary>
-        /// Gets or sets the seeds.
+        /// An array of recommendation seed objects.
         /// </summary>
-        /// <value>
-        /// The seeds.
-        /// </value>
-        [JsonProperty(PropertyName = "seeds")]
+        [JsonPropertyName("seeds")]
         public RecommendationsSeed[] Seeds { get; set; }
 
         /// <summary>
-        /// Gets or sets the tracks.
+        /// An array of simplified track objects ordered according to the parameters supplied.
         /// </summary>
-        /// <value>
-        /// The tracks.
-        /// </value>
-        [JsonProperty(PropertyName = "tracks")]
-        public SimpleTrack[] Tracks { get; set; }
+        [JsonPropertyName("tracks")]
+        public SimplifiedTrack[] Tracks { get; set; }
     }
 }

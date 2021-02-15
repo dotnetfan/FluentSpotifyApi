@@ -26,12 +26,12 @@ namespace FluentSpotifyApi.AuthorizationFlows.UWP.Extensions
             }
         }
 
-        public static Task RunDirectlyOrDispatchAsyncAsync(this CoreDispatcher dispatcher, Func<CancellationToken, Task> func, CancellationToken cancellationToken)
+        public static Task RunDirectlyOrDispatchAsync(this CoreDispatcher dispatcher, Func<CancellationToken, Task> func, CancellationToken cancellationToken)
         {
-            return dispatcher.RunDirectlyOrDispatchAsyncAsync(async innerCt => { await func(innerCt).ConfigureAwait(false); return 0; }, cancellationToken);
+            return dispatcher.RunDirectlyOrDispatchAsync(async innerCt => { await func(innerCt).ConfigureAwait(false); return 0; }, cancellationToken);
         }
 
-        public static async Task<T> RunDirectlyOrDispatchAsyncAsync<T>(this CoreDispatcher dispatcher, Func<CancellationToken, Task<T>> func, CancellationToken cancellationToken)
+        public static async Task<T> RunDirectlyOrDispatchAsync<T>(this CoreDispatcher dispatcher, Func<CancellationToken, Task<T>> func, CancellationToken cancellationToken)
         {
             Task<T> task = null;
 
@@ -42,7 +42,7 @@ namespace FluentSpotifyApi.AuthorizationFlows.UWP.Extensions
             else
             {
                 await dispatcher.RunAsync(
-                    CoreDispatcherPriority.Normal, 
+                    CoreDispatcherPriority.Normal,
                     () =>
                     {
                         task = func(cancellationToken);

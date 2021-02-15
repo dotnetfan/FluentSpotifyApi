@@ -1,47 +1,35 @@
-﻿using FluentSpotifyApi.Core.Model;
-using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
+using FluentSpotifyApi.Core.Model;
 
 namespace FluentSpotifyApi.Model.Browse
 {
     /// <summary>
     /// The category.
     /// </summary>
-    public class Category
+    public class Category : JsonObject
     {
         /// <summary>
-        /// Gets or sets the href.
+        /// A link to the Web API endpoint returning full details of the category.
         /// </summary>
-        /// <value>
-        /// The href.
-        /// </value>
-        [JsonProperty(PropertyName = "href")]
+        [JsonPropertyName("href")]
         public string Href { get; set; }
 
         /// <summary>
-        /// Gets or sets the icons.
+        /// The category icon, in various sizes.
         /// </summary>
-        /// <value>
-        /// The icons.
-        /// </value>
-        [JsonProperty(PropertyName = "icons")]
+        [JsonPropertyName("icons")]
         public Image[] Icons { get; set; }
 
         /// <summary>
-        /// Gets or sets the identifier.
+        /// The Spotify category ID of the category.
         /// </summary>
-        /// <value>
-        /// The identifier.
-        /// </value>
-        [JsonProperty(PropertyName = "id")]
+        [JsonPropertyName("id")]
         public string Id { get; set; }
 
         /// <summary>
-        /// Gets or sets the name.
+        /// The name of the category.
         /// </summary>
-        /// <value>
-        /// The name.
-        /// </value>
-        [JsonProperty(PropertyName = "name")]
+        [JsonPropertyName("name")]
         public string Name { get; set; }
     }
 }

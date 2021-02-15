@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace FluentSpotifyApi.Core.Model
 {
@@ -9,39 +9,31 @@ namespace FluentSpotifyApi.Core.Model
     public class PrivateUser : UserBase
     {
         /// <summary>
-        /// Gets or sets the birth date.
+        /// The country of the user, as set in the user’s account profile. An ISO 3166-1 alpha-2 country code.
+        /// This field is only available when the current user has granted access to the <c>user-read-private</c> scope.
         /// </summary>
-        /// <value>
-        /// The birth date.
-        /// </value>
-        [JsonProperty(PropertyName = "birthdate")]
-        public string BirthDate { get; set; }
-
-        /// <summary>
-        /// Gets or sets the country.
-        /// </summary>
-        /// <value>
-        /// The country.
-        /// </value>
-        [JsonProperty(PropertyName = "country")]
+        [JsonPropertyName("country")]
         public string Country { get; set; }
 
         /// <summary>
-        /// Gets or sets the email.
+        /// The user’s email address, as entered by the user when creating their account.
+        /// Important! This email address is unverified; there is no proof that it actually belongs to the user.
+        /// This field is only available when the current user has granted access to the <c>user-read-email</c> scope.
         /// </summary>
-        /// <value>
-        /// The email.
-        /// </value>
-        [JsonProperty(PropertyName = "email")]
+        [JsonPropertyName("email")]
         public string Email { get; set; }
 
         /// <summary>
-        /// Gets or sets the product.
+        /// The user’s explicit content settings. This field is only available when the current user has granted access to the <c>user-read-private</c> scope.
         /// </summary>
-        /// <value>
-        /// The product.
-        /// </value>
-        [JsonProperty(PropertyName = "product")]
+        [JsonPropertyName("explicit_content")]
+        public ExplicitContentSettings ExplicitContent { get; set; }
+
+        /// <summary>
+        /// The user’s Spotify subscription level: “premium”, “free”, etc. (The subscription level “open” can be considered the same as “free”.)
+        /// This field is only available when the current user has granted access to the <c>user-read-private</c> scope.
+        /// </summary>
+        [JsonPropertyName("product")]
         public string Product { get; set; }
     }
 }

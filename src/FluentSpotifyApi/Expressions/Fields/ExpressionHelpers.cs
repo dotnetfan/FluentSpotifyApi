@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace FluentSpotifyApi.Expressions.Fields
 {
@@ -19,7 +19,7 @@ namespace FluentSpotifyApi.Expressions.Fields
             MemberExpression memberExpression;
             while ((memberExpression = GetMemberExpression(expression)) != null)
             {
-                var fieldName = memberExpression.Member.GetCustomAttribute<JsonPropertyAttribute>()?.PropertyName ?? memberExpression.Member.Name;
+                var fieldName = memberExpression.Member.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name ?? memberExpression.Member.Name;
 
                 yield return fieldName;
 
@@ -28,7 +28,7 @@ namespace FluentSpotifyApi.Expressions.Fields
 
             if (expression != parameterExpression)
             {
-                throw new ArgumentException("The expression must be a member expression referencing the input parameter.");
+                throw new ArgumentException("The expression must be a member expression referencing the input parameter.", nameof(expression));
             }
         }
 
@@ -37,6 +37,10 @@ namespace FluentSpotifyApi.Expressions.Fields
             if (expression is BinaryExpression binaryExpression && binaryExpression.NodeType == ExpressionType.ArrayIndex)
             {
                 expression = binaryExpression.Left;
+            }
+            else if (expression is UnaryExpression unaryExpression && unaryExpression.NodeType == ExpressionType.Convert)
+            {
+                expression = unaryExpression.Operand;
             }
 
             return expression as MemberExpression;

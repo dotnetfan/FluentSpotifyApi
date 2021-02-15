@@ -10,7 +10,7 @@ namespace FluentSpotifyApi.Builder.Tracks
     public interface ITrackAudioFeaturesBuilder
     {
         /// <summary>
-        /// Get audio feature information for a single track identified by its unique Spotify ID.
+        /// Gets audio feature information for a single track identified by its unique Spotify ID.
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>

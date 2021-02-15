@@ -1,12 +1,12 @@
-﻿using FluentSpotifyApi.Model;
+﻿using FluentSpotifyApi.Model.Playlists;
 
 namespace FluentSpotifyApi.Sample.ACF.UWP.ViewModels
 {
     public class PlaylistViewModel
     {
-        private readonly SimplePlaylist playlist;
+        private readonly SimplifiedPlaylist playlist;
 
-        public PlaylistViewModel(SimplePlaylist playlist, bool isOwned)
+        public PlaylistViewModel(SimplifiedPlaylist playlist, bool isOwned)
         {
             this.playlist = playlist;
             this.IsOwned = isOwned;

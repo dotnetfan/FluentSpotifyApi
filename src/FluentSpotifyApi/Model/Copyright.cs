@@ -1,28 +1,23 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
+using FluentSpotifyApi.Core.Model;
 
 namespace FluentSpotifyApi.Model
 {
     /// <summary>
     /// The copyright.
     /// </summary>
-    public class Copyright
+    public class Copyright : JsonObject
     {
         /// <summary>
-        /// Gets or sets the text.
+        /// The copyright text for this content.
         /// </summary>
-        /// <value>
-        /// The text.
-        /// </value>
-        [JsonProperty(PropertyName = "text")]
+        [JsonPropertyName("text")]
         public string Text { get; set; }
 
         /// <summary>
-        /// Gets or sets the type.
+        /// The type of copyright: <c>C</c> = the copyright, <c>P</c> = the sound recording (performance) copyright.
         /// </summary>
-        /// <value>
-        /// The type.
-        /// </value>
-        [JsonProperty(PropertyName = "type")]
+        [JsonPropertyName("type")]
         public string Type { get; set; }
     }
 }

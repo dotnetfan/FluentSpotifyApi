@@ -5,13 +5,13 @@ using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
 
 namespace FluentSpotifyApi.AuthorizationFlows.AspNetCore.AuthorizationCode.Handler
 {
@@ -24,62 +24,62 @@ namespace FluentSpotifyApi.AuthorizationFlows.AspNetCore.AuthorizationCode.Handl
 
         protected override async Task<AuthenticationTicket> CreateTicketAsync(ClaimsIdentity identity, AuthenticationProperties properties, OAuthTokenResponse tokens)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, Options.UserInformationEndpoint);
+            var request = new HttpRequestMessage(HttpMethod.Get, this.Options.UserInformationEndpoint);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokens.AccessToken);
 
-            var response = await Backchannel.SendAsync(request, Context.RequestAborted);
+            var response = await this.Backchannel.SendAsync(request, this.Context.RequestAborted);
             if (!response.IsSuccessStatusCode)
             {
                 throw new HttpRequestException($"An error occurred when retrieving user information ({response.StatusCode}). Please check if the authentication information is correct and the corresponding Spotify API is enabled.");
             }
 
-            var payload = JObject.Parse(await response.Content.ReadAsStringAsync());
+            using var payload = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
 
-            var context = new OAuthCreatingTicketContext(new ClaimsPrincipal(identity), properties, Context, Scheme, Options, Backchannel, tokens, payload);
+            var context = new OAuthCreatingTicketContext(new ClaimsPrincipal(identity), properties, this.Context, this.Scheme, this.Options, this.Backchannel, tokens, payload.RootElement);
             context.RunClaimActions();
 
-            await Events.CreatingTicket(context);
-            return new AuthenticationTicket(context.Principal, context.Properties, Scheme.Name);
+            await this.Events.CreatingTicket(context);
+            return new AuthenticationTicket(context.Principal, context.Properties, this.Scheme.Name);
         }
 
         protected override string BuildChallengeUrl(Microsoft.AspNetCore.Authentication.AuthenticationProperties properties, string redirectUri)
         {
-            var scope = FormatScope();
+            var scope = this.FormatScope();
 
-            var state = Options.StateDataFormat.Protect(properties);
+            var state = this.Options.StateDataFormat.Protect(properties);
 
             var queryBuilder = new QueryBuilder()
             {
-                { "client_id", Options.ClientId },
+                { "client_id", this.Options.ClientId },
                 { "scope", scope },
                 { "response_type", "code" },
                 { "redirect_uri", redirectUri },
                 { "state", state },
-                { "show_dialog", Options.ShowDialog ? "true" : "false" }
+                { "show_dialog", this.Options.ShowDialog ? "true" : "false" }
             };
 
-            return Options.AuthorizationEndpoint + queryBuilder.ToString();
+            return this.Options.AuthorizationEndpoint + queryBuilder.ToString();
         }
 
-        protected async override Task<OAuthTokenResponse> ExchangeCodeAsync(string code, string redirectUri)
+        protected override async Task<OAuthTokenResponse> ExchangeCodeAsync(OAuthCodeExchangeContext context)
         {
-            var tokenRequestParameters = new Dictionary<string, string>()
+            var tokenRequestParams = new Dictionary<string, string>()
             {
-                { "redirect_uri", redirectUri },
-                { "code", code },
+                { "redirect_uri", context.RedirectUri },
+                { "code", context.Code },
                 { "grant_type", "authorization_code" },
             };
 
-            var requestContent = new FormUrlEncodedContent(tokenRequestParameters);
+            var requestContent = new FormUrlEncodedContent(tokenRequestParams);
 
-            var requestMessage = new HttpRequestMessage(HttpMethod.Post, Options.TokenEndpoint);
-            requestMessage.Headers.Add("Authorization", "Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes($"{Options.ClientId}:{Options.ClientSecret}")));
+            var requestMessage = new HttpRequestMessage(HttpMethod.Post, this.Options.TokenEndpoint);
+            requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{this.Options.ClientId}:{this.Options.ClientSecret}")));
             requestMessage.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             requestMessage.Content = requestContent;
-            var response = await Backchannel.SendAsync(requestMessage, Context.RequestAborted);
+            var response = await this.Backchannel.SendAsync(requestMessage, this.Context.RequestAborted);
             if (response.IsSuccessStatusCode)
             {
-                var payload = JObject.Parse(await response.Content.ReadAsStringAsync());
+                var payload = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
                 return OAuthTokenResponse.Success(payload);
             }
             else

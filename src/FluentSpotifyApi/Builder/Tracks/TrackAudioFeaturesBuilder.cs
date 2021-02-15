@@ -6,7 +6,8 @@ namespace FluentSpotifyApi.Builder.Tracks
 {
     internal class TrackAudioFeaturesBuilder : EntityBuilderBase, ITrackAudioFeaturesBuilder
     {
-        public TrackAudioFeaturesBuilder(ContextData contextData, string id) : base(contextData, "audio-features", id)
+        public TrackAudioFeaturesBuilder(RootBuilder root, string id)
+            : base(root, "audio-features", id)
         {
         }
 

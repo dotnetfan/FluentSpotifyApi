@@ -3,7 +3,7 @@
     /// <summary>
     /// The builder for specified device's playback.
     /// </summary>
-    /// <seealso cref="FluentSpotifyApi.Builder.Me.Player.IPlaybackBuilder" />
+    /// <seealso cref="IPlaybackBuilder"/>
     public interface IDevicePlaybackBuilder : IPlaybackBuilder
     {
     }

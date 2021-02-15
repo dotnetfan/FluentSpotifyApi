@@ -44,10 +44,10 @@
                     </Grid>
                 </StackPanel>
             </Grid>
-            <Grid Grid.Row="1" Padding="6" Background="LightSalmon" Visibility="{Binding LoginViewModel.IsLoginServiceError, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Grid Grid.Row="1" Padding="6" Background="LightSalmon" Visibility="{Binding LoginViewModel.IsLoginCommunicationError, Converter={StaticResource BoolToVisibilityConverter}}">
                 <TextBlock Text="A communication error has occurred while logging in with Spotify." HorizontalAlignment="Left" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}" />
             </Grid>
-            <Grid Grid.Row="2" Padding="6" Background="LightSalmon" Visibility="{Binding IsLoadPlaylistsServiceError, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Grid Grid.Row="2" Padding="6" Background="LightSalmon" Visibility="{Binding IsLoadPlaylistsCommunicationError, Converter={StaticResource BoolToVisibilityConverter}}">
                 <TextBlock Text="A communication error has occurred while loading playlists." HorizontalAlignment="Left" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}" />
             </Grid>
             <Grid Grid.Row="3" Padding="6" Background="LightSalmon" Visibility="{Binding IsLoadPlaylistsCanceled, Converter={StaticResource BoolToVisibilityConverter}}">

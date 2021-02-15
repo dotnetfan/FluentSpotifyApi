@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+﻿using System.Runtime.Serialization;
 
 namespace FluentSpotifyApi.Builder.Search
 {
@@ -10,25 +10,37 @@ namespace FluentSpotifyApi.Builder.Search
         /// <summary>
         /// The album
         /// </summary>
-        [Description("album")]
+        [EnumMember(Value = "album")]
         Album,
 
         /// <summary>
         /// The artist
         /// </summary>
-        [Description("artist")]
+        [EnumMember(Value = "artist")]
         Artist,
 
         /// <summary>
         /// The playlist
         /// </summary>
-        [Description("playlist")]
+        [EnumMember(Value = "playlist")]
         Playlist,
 
         /// <summary>
         /// The track
         /// </summary>
-        [Description("track")]
-        Track
+        [EnumMember(Value = "track")]
+        Track,
+
+        /// <summary>
+        /// The track
+        /// </summary>
+        [EnumMember(Value = "show")]
+        Show,
+
+        /// <summary>
+        /// The track
+        /// </summary>
+        [EnumMember(Value = "episode")]
+        Episode
     }
 }

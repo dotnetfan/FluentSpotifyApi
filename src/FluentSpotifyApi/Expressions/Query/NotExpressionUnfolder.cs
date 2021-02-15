@@ -27,7 +27,7 @@ namespace FluentSpotifyApi.Expressions.Query
                     }
                     else
                     {
-                        throw new ArgumentException($"Unsupported NOT expression operand of type '{operand.GetType()}' has been found.");
+                        throw new ArgumentException($"Unsupported NOT expression operand of type '{operand.GetType()}' has been found.", nameof(operand));
                     }
                 }
                 else if (item is BinaryExpression binaryExpression && binaryExpression.NodeType == ExpressionType.NotEqual)

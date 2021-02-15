@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
-using FluentSpotifyApi.AuthorizationFlows.AuthorizationCode.Native;
+using FluentSpotifyApi.AuthorizationFlows.Native.AuthorizationCode;
 using FluentSpotifyApi.Core.Exceptions;
-using FluentSpotifyApi.Core.Model;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 
@@ -17,7 +16,7 @@ namespace FluentSpotifyApi.Sample.ACF.UWP.ViewModels
 
         private UserViewModel user;
 
-        private bool isLoginServiceError;
+        private bool isLoginCommunicationError;
 
         private bool isLoggingInOrLoggingOut;
 
@@ -78,16 +77,16 @@ namespace FluentSpotifyApi.Sample.ACF.UWP.ViewModels
             }
         }
 
-        public bool IsLoginServiceError
+        public bool IsLoginCommunicationError
         {
             get
             {
-                return this.isLoginServiceError;
+                return this.isLoginCommunicationError;
             }
 
             set
             {
-                this.Set(() => this.IsLoginServiceError, ref this.isLoginServiceError, value);
+                this.Set(() => this.IsLoginCommunicationError, ref this.isLoginCommunicationError, value);
             }
         }
 
@@ -140,22 +139,22 @@ namespace FluentSpotifyApi.Sample.ACF.UWP.ViewModels
 
         public async Task LogInAsync()
         {
-            this.IsLoginServiceError = false;
+            this.IsLoginCommunicationError = false;
             try
             {
                 await this.authenticationManager.RestoreSessionOrAuthorizeUserAsync();
-                this.UpdateViewModel(true, this.authenticationManager.GetUser());
+                this.UpdateViewModel(true, this.authenticationManager.GetUserClaims());
             }
-            catch (SpotifyServiceException)
+            catch (SpotifyCommunicationException)
             {
-                this.IsLoginServiceError = true;
+                this.IsLoginCommunicationError = true;
             }
         }
 
-        private void UpdateViewModel(bool isLoggedIn, PrivateUser user)
+        private void UpdateViewModel(bool isLoggedIn, UserClaims userClaims)
         {
             this.IsLoggedIn = isLoggedIn;
-            this.User = isLoggedIn ? new UserViewModel(user) : null;
+            this.User = isLoggedIn ? new UserViewModel(userClaims) : null;
         }
     }
 }

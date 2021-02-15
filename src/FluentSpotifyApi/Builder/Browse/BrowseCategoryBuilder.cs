@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
 using FluentSpotifyApi.Model.Browse;
 
@@ -7,16 +6,16 @@ namespace FluentSpotifyApi.Builder.Browse
 {
     internal class BrowseCategoryBuilder : EntityBuilderBase, IBrowseCategoryBuilder
     {
-        public BrowseCategoryBuilder(ContextData contextData, IEnumerable<object> routeValuesPrefix, string endpointName, string id) 
-            : base(contextData, routeValuesPrefix, endpointName, id)
+        public BrowseCategoryBuilder(BuilderBase parent, string id)
+            : base(parent, "categories", id)
         {
         }
 
-        public IBrowseCategoryPlaylistsBuilder Playlists => new BrowseCategoryPlaylistsBuilder(ContextData, RouteValuesPrefix);
+        public IBrowseCategoryPlaylistsBuilder Playlists => new BrowseCategoryPlaylistsBuilder(this);
 
         public Task<Category> GetAsync(string country, string locale, CancellationToken cancellationToken)
         {
-            return this.GetAsync<Category>(cancellationToken, optionalQueryStringParameters: new { country, locale });
+            return this.GetAsync<Category>(cancellationToken, queryParams: new { country, locale });
         }
     }
 }

@@ -7,17 +7,17 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace FluentSpotifyApi.IntegrationTests.CCF
 {
     [TestClass]
-    public class ArtistsTests : TestBase
+    public class ArtistsTests : TestsBase
     {
         [TestMethod]
         [TestCategory(Settings.TestCategoryKey)]
-        public async Task ShouldGetArtistByIdAsync()
+        public async Task ShouldGetArtist()
         {
             // Arrange
             const string id = "0OdUWJ0sBjDrqHygGUXeCF";
 
             // Act
-            var result = await this.Client.Artist(id).GetAsync();
+            var result = await this.Client.Artists(id).GetAsync();
 
             // Assert
             result.Id.Should().Be(id);
@@ -25,7 +25,7 @@ namespace FluentSpotifyApi.IntegrationTests.CCF
 
         [TestMethod]
         [TestCategory(Settings.TestCategoryKey)]
-        public async Task ShouldGetArtistsByIdsAsync()
+        public async Task ShouldGetArtists()
         {
             // Arrange
             var ids = new[] { "0oSGxfWSnnOXhD2fKuz2Gy", "3dBVyJ7JuOMt4GE9607Qin" };
@@ -39,14 +39,14 @@ namespace FluentSpotifyApi.IntegrationTests.CCF
 
         [TestMethod]
         [TestCategory(Settings.TestCategoryKey)]
-        public async Task ShouldGetArtistAlbumsByIdAsync()
+        public async Task ShouldGetArtistAlbums()
         {
             // Arrange
             const string id = "1vCWHaC5f2uS3yhpwWbIA6";
             const int limit = 2;
 
             // Act
-            var result = await this.Client.Artist(id).Albums.GetAsync(albumTypes: new[] { AlbumType.Single }, limit: limit, market: "ES");
+            var result = await this.Client.Artists(id).Albums.GetAsync(includeGroups: new[] { AlbumType.Single }, limit: limit, market: "ES");
 
             // Assert
             result.Items.Should().HaveCount(limit);
@@ -54,13 +54,13 @@ namespace FluentSpotifyApi.IntegrationTests.CCF
 
         [TestMethod]
         [TestCategory(Settings.TestCategoryKey)]
-        public async Task ShouldGetArtistTopTracksByIdAsync()
+        public async Task ShouldGetArtistTopTracks()
         {
             // Arrange
             const string id = "43ZHCT0cAZBISjO8DG9PnE";
 
             // Act
-            var result = await this.Client.Artist(id).TopTracks.GetAsync(country: "SE");
+            var result = await this.Client.Artists(id).TopTracks.GetAsync(country: "SE");
 
             // Assert
             result.Should().NotBeNull();
@@ -68,13 +68,13 @@ namespace FluentSpotifyApi.IntegrationTests.CCF
 
         [TestMethod]
         [TestCategory(Settings.TestCategoryKey)]
-        public async Task ShouldGetArtistRelatedArtistsByIdAsync()
+        public async Task ShouldGetArtistRelatedArtists()
         {
             // Arrange
             const string id = "43ZHCT0cAZBISjO8DG9PnE";
 
             // Act
-            var result = await this.Client.Artist(id).RelatedArtists.GetAsync();
+            var result = await this.Client.Artists(id).RelatedArtists.GetAsync();
 
             // Assert
             result.Should().NotBeNull();

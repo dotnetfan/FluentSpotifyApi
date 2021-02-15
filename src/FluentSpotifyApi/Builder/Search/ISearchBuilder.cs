@@ -1,5 +1,10 @@
-﻿using FluentSpotifyApi.Model;
-using FluentSpotifyApi.Model.Messages;
+﻿using FluentSpotifyApi.Model.Albums;
+using FluentSpotifyApi.Model.Artists;
+using FluentSpotifyApi.Model.Episodes;
+using FluentSpotifyApi.Model.Playlists;
+using FluentSpotifyApi.Model.Search;
+using FluentSpotifyApi.Model.Shows;
+using FluentSpotifyApi.Model.Tracks;
 
 namespace FluentSpotifyApi.Builder.Search
 {
@@ -11,34 +16,44 @@ namespace FluentSpotifyApi.Builder.Search
         /// <summary>
         /// Gets builder for "search?type=album" endpoint.
         /// </summary>
-        ISearchTypeBuilder<SimpleAlbumsPageMessage> Albums { get; }
+        ISearchTypeBuilder<SimplifiedAlbumsPageResponse> Albums { get; }
 
         /// <summary>
         /// Gets builder for "search?type=artist" endpoint.
         /// </summary>
-        ISearchTypeBuilder<FullArtistsPageMessage> Artists { get; }
+        ISearchTypeBuilder<ArtistsPageResponse> Artists { get; }
 
         /// <summary>
         /// Gets builder for "search?type=playlist" endpoint.
         /// </summary>
-        ISearchTypeBuilder<SimplePlaylistsPageMessage> Playlists { get; }
+        ISearchTypeBuilder<SimplifiedPlaylistsPageResponse> Playlists { get; }
 
         /// <summary>
         /// Gets builder for "search?type=track" endpoint.
         /// </summary>
-        ISearchTypeBuilder<FullTracksPageMessage> Tracks { get; }
+        ISearchTypeBuilder<TracksPageResponse> Tracks { get; }
+
+        /// <summary>
+        /// Gets builder for "search?type=show" endpoint.
+        /// </summary>
+        ISearchTypeBuilder<SimplifiedShowsPageResponse> Shows { get; }
+
+        /// <summary>
+        /// Gets builder for "search?type=episode" endpoint.
+        /// </summary>
+        ISearchTypeBuilder<SimplifiedEpisodesPageResponse> Episodes { get; }
 
         /// <summary>
         /// Gets builder for "search?type={entities}" endpoint.
         /// </summary>
         /// <param name="entities">The entities.</param>
         /// <returns></returns>
-        ISearchTypeBuilder<SearchResult> Entities(params Entity[] entities);
+        ISearchTypeBuilder<SearchResponse> Entities(params Entity[] entities);
 
         /// <summary>
         /// Gets builder for "search?type={allEntities}" endpoint.
         /// </summary>
         /// <returns></returns>
-        ISearchTypeBuilder<SearchResult> Entities();
+        ISearchTypeBuilder<SearchResponse> Entities();
     }
 }

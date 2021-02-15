@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.Http;
@@ -20,20 +21,21 @@ namespace FluentSpotifyApi.AuthorizationFlows.AspNetCore.AuthorizationCode.Handl
             this.AuthorizationEndpoint = SpotifyDefaults.AuthorizationEndpoint;
             this.TokenEndpoint = SpotifyDefaults.TokenEndpoint;
             this.UserInformationEndpoint = SpotifyDefaults.UserInformationEndpoint;
-            this.Scope.Add(SpotifyDefaults.UserReadEmailScope);
 
-            ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
-            ClaimActions.MapCustomJson(ClaimTypes.Name, SpotifyHelper.GetName);
-            ClaimActions.MapJsonKey(ClaimTypes.Email, "email");
-            ClaimActions.MapCustomJson(SpotifyClaimTypes.ProfilePicture, SpotifyHelper.GetProfilePicture);
+            this.ClaimActions.MapJsonKey(ClaimTypes.NameIdentifier, "id");
+            this.ClaimActions.MapCustomJson(ClaimTypes.Name, GetName);
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether user is forced to re-approve the app during authentication. Set to <c>false</c> by default.
+        /// Gets or sets a value indicating whether user is forced to re-approve the app during authentication. Defaults to <c>false</c>.
         /// </summary>
-        /// <value>
-        /// If set to <c>true</c> the user is forced to re-approve the app during authentication.
-        /// </value>
-        public bool ShowDialog { get; set; }        
+        public bool ShowDialog { get; set; }
+
+        private static string GetName(JsonElement user)
+        {
+            return user.TryGetProperty("display_name", out var displayNameProp) && displayNameProp.GetString() is var displayName && !string.IsNullOrEmpty(displayName)
+                ? displayName
+                : user.GetProperty("id").GetString();
+        }
     }
 }

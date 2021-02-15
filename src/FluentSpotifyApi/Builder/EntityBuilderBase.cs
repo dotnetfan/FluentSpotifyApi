@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using FluentSpotifyApi.Core.Internal.Extensions;
+﻿using FluentSpotifyApi.Core.Utils;
 
 namespace FluentSpotifyApi.Builder
 {
@@ -7,14 +6,12 @@ namespace FluentSpotifyApi.Builder
     {
         protected readonly string Id;
 
-        protected EntityBuilderBase(ContextData contextData, string endpointName, string id) 
-            : this(contextData, null, endpointName, id)
+        protected EntityBuilderBase(BuilderBase parent, string entityName, string id)
+            : base(parent, new[] { entityName, id })
         {
-        }
+            SpotifyArgumentAssertUtils.ThrowIfNullOrEmpty(entityName, nameof(entityName));
+            SpotifyArgumentAssertUtils.ThrowIfNullOrEmpty(id, nameof(id));
 
-        protected EntityBuilderBase(ContextData contextData, IEnumerable<object> routeValuesPrefix, string endpointName, string id) 
-            : base(contextData, routeValuesPrefix, endpointName, id.Yield())
-        {
             this.Id = id;
         }
     }

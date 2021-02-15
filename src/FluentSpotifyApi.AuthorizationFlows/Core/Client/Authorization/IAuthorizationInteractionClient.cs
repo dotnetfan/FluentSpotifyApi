@@ -7,16 +7,15 @@ namespace FluentSpotifyApi.AuthorizationFlows.Core.Client.Authorization
     /// <summary>
     /// The authorization interaction service.
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public interface IAuthorizationInteractionClient<T>
+    public interface IAuthorizationInteractionClient
     {
         /// <summary>
-        /// Gets the authorization from the Spotify Accounts Service.
+        /// Gets the authorization URI from the Spotify Accounts Service.
         /// </summary>
-        /// <param name="authorizationUrl">The authorization URL.</param>
-        /// <param name="callbackUrl">The callback URL.</param>
+        /// <param name="authorizationUri">The authorization URI.</param>
+        /// <param name="redirectUri">The redirect URI.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
-        Task<AuthorizationResponse<T>> AuthorizeAsync(Uri authorizationUrl, Uri callbackUrl, CancellationToken cancellationToken);
+        Task<Uri> AuthorizeAsync(Uri authorizationUri, Uri redirectUri, CancellationToken cancellationToken = default(CancellationToken));
     }
 }

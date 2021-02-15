@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using FluentSpotifyApi.Model.Messages;
+using FluentSpotifyApi.Model.Player;
 
 namespace FluentSpotifyApi.Builder.Me.Player
 {
@@ -13,6 +13,6 @@ namespace FluentSpotifyApi.Builder.Me.Player
         /// Get information about a user’s available devices.
         /// </summary>
         /// <param name="cancellationToken">The cancellation token.</param>
-        Task<DevicesMessage> GetAsync(CancellationToken cancellationToken = default(CancellationToken));
+        Task<DevicesResponse> GetAsync(CancellationToken cancellationToken = default(CancellationToken));
     }
 }

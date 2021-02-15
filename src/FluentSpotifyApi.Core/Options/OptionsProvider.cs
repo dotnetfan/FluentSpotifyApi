@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 
 namespace FluentSpotifyApi.Core.Options
 {
@@ -7,7 +6,8 @@ namespace FluentSpotifyApi.Core.Options
     /// The options provider implementation using <see cref="IOptions{TOptions}"/>.
     /// </summary>
     /// <typeparam name="TOptions"></typeparam>
-    public class OptionsProvider<TOptions> : IOptionsProvider<TOptions> where TOptions : class, new()
+    public class OptionsProvider<TOptions> : IOptionsProvider<TOptions>
+        where TOptions : class, new()
     {
         private readonly IOptions<TOptions> options;
 
@@ -24,22 +24,6 @@ namespace FluentSpotifyApi.Core.Options
         /// Gets the current options.
         /// </summary>
         /// <returns></returns>
-        /// <exception cref="System.ArgumentNullException">Thrown when current options value is null.</exception>
-        public TOptions Get()
-        {
-            var value = this.options.Value;
-
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
-
-            if (value is IValidatable validatable)
-            {
-                validatable.Validate();
-            }
-
-            return value;
-        }
+        public TOptions Get() => this.options.Value;
     }
 }

@@ -6,7 +6,8 @@ namespace FluentSpotifyApi.Builder.Tracks
 {
     internal class TrackAudioAnalysisBuilder : EntityBuilderBase, ITrackAudioAnalysisBuilder
     {
-        public TrackAudioAnalysisBuilder(ContextData contextData, string id) : base(contextData, "audio-analysis", id)
+        public TrackAudioAnalysisBuilder(RootBuilder root, string id)
+            : base(root, "audio-analysis", id)
         {
         }
 

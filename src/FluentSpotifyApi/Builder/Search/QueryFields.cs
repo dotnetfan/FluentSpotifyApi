@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+﻿using FluentSpotifyApi.Expressions.Query;
 
 namespace FluentSpotifyApi.Builder.Search
 {
@@ -15,49 +15,49 @@ namespace FluentSpotifyApi.Builder.Search
         /// <summary>
         /// The album field.
         /// </summary>
-        [Description("album")]
+        [QueryField("album")]
         public string Album { get; }
 
         /// <summary>
         /// The artist field.
         /// </summary>
-        [Description("artist")]
+        [QueryField("artist")]
         public string Artist { get; }
 
         /// <summary>
         /// The track field.
         /// </summary>
-        [Description("track")]
+        [QueryField("track")]
         public string Track { get; }
 
         /// <summary>
         /// The year field.
         /// </summary>
-        [Description("year")]
+        [QueryField("year")]
         public int Year { get; }
 
         /// <summary>
         /// The tag field.
         /// </summary>
-        [Description("tag")]
+        [QueryField("tag")]
         public Tag Tag { get; }
 
         /// <summary>
         /// The genre field.
         /// </summary>
-        [Description("genre")]
+        [QueryField("genre")]
         public string Genre { get; }
 
         /// <summary>
         /// The UPC field.
         /// </summary>
-        [Description("upc")]
+        [QueryField("upc")]
         public string Upc { get; }
 
         /// <summary>
         /// The ISRC field.
         /// </summary>
-        [Description("isrc")]
+        [QueryField("isrc")]
         public string Isrc { get; }
     }
 }

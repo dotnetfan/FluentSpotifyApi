@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using FluentSpotifyApi.Sample.CCF.AspNetCore.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace FluentSpotifyApi.Sample.CCF.AspNetCore.Controllers
 {
@@ -20,23 +21,15 @@ namespace FluentSpotifyApi.Sample.CCF.AspNetCore.Controllers
             return this.View();
         }
 
-        public IActionResult About()
+        public IActionResult Privacy()
         {
-            this.ViewData["Message"] = "Your application description page.";
-
             return this.View();
         }
 
-        public IActionResult Contact()
-        {
-            this.ViewData["Message"] = "Your contact page.";
-
-            return this.View();
-        }
-
+        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
-            return this.View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return this.View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? this.HttpContext.TraceIdentifier });
         }
 
         public async Task<IActionResult> NewReleases()

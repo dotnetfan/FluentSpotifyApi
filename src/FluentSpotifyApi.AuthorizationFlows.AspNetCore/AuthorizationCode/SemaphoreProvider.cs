@@ -15,7 +15,7 @@ namespace FluentSpotifyApi.AuthorizationFlows.AspNetCore.AuthorizationCode
 
         public SemaphoreSlim Get()
         {
-            return this.httpContextAccessor.HttpContext.RequestServices.GetRequiredService<SemaphoreRegistrationWrapper>().Value;
+            return this.httpContextAccessor.HttpContext.RequestServices.GetRequiredService<SemaphoreWrapper>().Value;
         }
     }
 }

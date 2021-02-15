@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+﻿using System.Runtime.Serialization;
 
 namespace FluentSpotifyApi.Builder.Me.Player
 {
@@ -8,21 +8,21 @@ namespace FluentSpotifyApi.Builder.Me.Player
     public enum RepeatMode
     {
         /// <summary>
-        /// Will repeat the current track. 
+        /// Will repeat the current track.
         /// </summary>
-        [Description("track")]
+        [EnumMember(Value = "track")]
         Track,
 
         /// <summary>
         /// Will repeat the current context.
         /// </summary>
-        [Description("context")]
+        [EnumMember(Value = "context")]
         Context,
 
         /// <summary>
         /// Will turn repeat off.
         /// </summary>
-        [Description("off")]
+        [EnumMember(Value = "off")]
         Off
     }
 }

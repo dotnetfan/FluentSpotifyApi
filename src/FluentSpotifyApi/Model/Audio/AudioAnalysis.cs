@@ -1,73 +1,53 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
+using FluentSpotifyApi.Core.Model;
 
 namespace FluentSpotifyApi.Model.Audio
 {
     /// <summary>
     /// The audio analysis.
     /// </summary>
-    public class AudioAnalysis
+    public class AudioAnalysis : JsonObject
     {
         /// <summary>
-        /// Gets or sets the meta.
-        /// </summary>
-        /// <value>
         /// The meta.
-        /// </value>
-        [JsonProperty(PropertyName = "meta")]
+        /// </summary>
+        [JsonPropertyName("meta")]
         public Meta Meta { get; set; }
 
         /// <summary>
-        /// Gets or sets the track.
+        /// The audio track.
         /// </summary>
-        /// <value>
-        /// The track.
-        /// </value>
-        [JsonProperty(PropertyName = "track")]
-        public Track Track { get; set; }
+        [JsonPropertyName("track")]
+        public AudioTrack Track { get; set; }
 
         /// <summary>
-        /// Gets or sets the bars.
-        /// </summary>
-        /// <value>
         /// The bars.
-        /// </value>
-        [JsonProperty(PropertyName = "bars")]
-        public Bar[] Bars { get; set; }
+        /// </summary>
+        [JsonPropertyName("bars")]
+        public TimeInterval[] Bars { get; set; }
 
         /// <summary>
-        /// Gets or sets the beats.
-        /// </summary>
-        /// <value>
         /// The beats.
-        /// </value>
-        [JsonProperty(PropertyName = "beats")]
-        public Beat[] Beats { get; set; }
+        /// </summary>
+        [JsonPropertyName("beats")]
+        public TimeInterval[] Beats { get; set; }
 
         /// <summary>
-        /// Gets or sets the tatums.
-        /// </summary>
-        /// <value>
         /// The tatums.
-        /// </value>
-        [JsonProperty(PropertyName = "tatums")]
-        public Tatum[] Tatums { get; set; }
+        /// </summary>
+        [JsonPropertyName("tatums")]
+        public TimeInterval[] Tatums { get; set; }
 
         /// <summary>
-        /// Gets or sets the sections.
-        /// </summary>
-        /// <value>
         /// The sections.
-        /// </value>
-        [JsonProperty(PropertyName = "sections")]
+        /// </summary>
+        [JsonPropertyName("sections")]
         public Section[] Sections { get; set; }
 
         /// <summary>
-        /// Gets or sets the segments.
-        /// </summary>
-        /// <value>
         /// The segments.
-        /// </value>
-        [JsonProperty(PropertyName = "segments")]
+        /// </summary>
+        [JsonPropertyName("segments")]
         public Segment[] Segments { get; set; }
     }
 }

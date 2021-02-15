@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
+using FluentSpotifyApi.Core.Model;
 
 namespace FluentSpotifyApi.Model
 {
@@ -6,69 +7,48 @@ namespace FluentSpotifyApi.Model
     /// The page.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class Page<T>
+    public class Page<T> : JsonObject
     {
         /// <summary>
-        /// Gets or sets the href.
+        /// A link to the Web API endpoint returning the full result of the request.
         /// </summary>
-        /// <value>
-        /// The href.
-        /// </value>
-        [JsonProperty(PropertyName = "href")]
+        [JsonPropertyName("href")]
         public string Href { get; set; }
 
         /// <summary>
-        /// Gets or sets the items.
+        /// The requested data.
         /// </summary>
-        /// <value>
-        /// The items.
-        /// </value>
-        [JsonProperty(PropertyName = "items")]
+        [JsonPropertyName("items")]
         public T[] Items { get; set; }
 
         /// <summary>
-        /// Gets or sets the limit.
+        /// The maximum number of items in the response (as set in the query or by default).
         /// </summary>
-        /// <value>
-        /// The limit.
-        /// </value>
-        [JsonProperty(PropertyName = "limit")]
+        [JsonPropertyName("limit")]
         public int Limit { get; set; }
 
         /// <summary>
-        /// Gets or sets the next.
+        /// URL to the next page of items. (<c>null</c> if none).
         /// </summary>
-        /// <value>
-        /// The next.
-        /// </value>
-        [JsonProperty(PropertyName = "next")]
+        [JsonPropertyName("next")]
         public string Next { get; set; }
 
         /// <summary>
-        /// Gets or sets the offset.
+        /// The offset of the items returned (as set in the query or by default).
         /// </summary>
-        /// <value>
-        /// The offset.
-        /// </value>
-        [JsonProperty(PropertyName = "offset")]
+        [JsonPropertyName("offset")]
         public int Offset { get; set; }
 
         /// <summary>
-        /// Gets or sets the previous.
+        /// URL to the previous page of items. (<c>null</c> if none).
         /// </summary>
-        /// <value>
-        /// The previous.
-        /// </value>
-        [JsonProperty(PropertyName = "previous")]
+        [JsonPropertyName("previous")]
         public string Previous { get; set; }
 
         /// <summary>
-        /// Gets or sets the total.
+        /// The total number of items available to return.
         /// </summary>
-        /// <value>
-        /// The total.
-        /// </value>
-        [JsonProperty(PropertyName = "total")]
+        [JsonPropertyName("total")]
         public int Total { get; set; }
     }
 }

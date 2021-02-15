@@ -1,19 +1,17 @@
-﻿using FluentSpotifyApi.Client;
-using FluentSpotifyApi.Core.Options;
-using FluentSpotifyApi.Options;
+﻿using FluentSpotifyApi.Core.User;
 
 namespace FluentSpotifyApi.Builder
 {
     internal class ContextData
     {
-        public ContextData(ISpotifyHttpClient spotifyHttpClient, IOptionsProvider<FluentSpotifyClientOptions> fluentSpotifyClientOptionsProvider) 
+        public ContextData(IFluentSpotifyHttpClientFactory httpClientFactory, ICurrentUserProvider currentUserProvider)
         {
-            this.SpotifyHttpClient = spotifyHttpClient;
-            this.FluentSpotifyClientOptionsProvider = fluentSpotifyClientOptionsProvider;
+            this.HttpClientFactory = httpClientFactory;
+            this.CurrentUserProvider = currentUserProvider;
         }
 
-        public ISpotifyHttpClient SpotifyHttpClient { get; }
+        public IFluentSpotifyHttpClientFactory HttpClientFactory { get; }
 
-        public IOptionsProvider<FluentSpotifyClientOptions> FluentSpotifyClientOptionsProvider { get; }
+        public ICurrentUserProvider CurrentUserProvider { get; }
     }
 }

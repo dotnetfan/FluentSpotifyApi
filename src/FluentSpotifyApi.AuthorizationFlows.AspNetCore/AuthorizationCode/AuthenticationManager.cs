@@ -1,7 +1,7 @@
-﻿using System;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
+using FluentSpotifyApi.AuthorizationFlows.Core.Exceptions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 
@@ -25,7 +25,7 @@ namespace FluentSpotifyApi.AuthorizationFlows.AspNetCore.AuthorizationCode
 
             if (!(result.Principal?.Identity?.IsAuthenticated).GetValueOrDefault())
             {
-                throw new UnauthorizedAccessException();
+                throw new SpotifyUnauthenticatedException();
             }
 
             return new AuthenticateResultWrapper(result);

@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using FluentSpotifyApi.Model;
+using FluentSpotifyApi.Model.Tracks;
 
 namespace FluentSpotifyApi.Builder.Tracks
 {
@@ -20,11 +20,11 @@ namespace FluentSpotifyApi.Builder.Tracks
         ITrackAudioFeaturesBuilder AudioFeatures { get; }
 
         /// <summary>
-        /// Get Spotify catalog information for a single track identified by its unique Spotify ID.
+        /// Gets Spotify catalog information for a single track identified by its unique Spotify ID.
         /// </summary>
-        /// <param name="market">An ISO 3166-1 alpha-2 country code.</param>
+        /// <param name="market">An ISO 3166-1 alpha-2 country code or the string <c>from_token</c>. Provide this parameter if you want to apply Track Relinking.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns></returns>
-        Task<FullTrack> GetAsync(string market = null, CancellationToken cancellationToken = default(CancellationToken));
+        Task<Track> GetAsync(string market = null, CancellationToken cancellationToken = default(CancellationToken));
     }
 }

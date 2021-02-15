@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Net.Http;
+using System.Threading.Tasks;
 using FluentSpotifyApi.AuthorizationFlows.ClientCredentials;
-using FluentSpotifyApi.AuthorizationFlows.ClientCredentials.Extensions;
-using FluentSpotifyApi.Core.Exceptions;
-using FluentSpotifyApi.Core.Extensions;
-using FluentSpotifyApi.Extensions;
+using FluentSpotifyApi.AuthorizationFlows.ClientCredentials.DependencyInjection;
+using FluentSpotifyApi.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Polly;
+using Polly.Extensions.Http;
 
 namespace FluentSpotifyApi.IntegrationTests.CCF
 {
@@ -23,46 +22,36 @@ namespace FluentSpotifyApi.IntegrationTests.CCF
         public static void AssemblyInit(TestContext context)
         {
             // Build configuration
-            var builder = new ConfigurationBuilder()
-                .AddJsonFile("secrets.json", optional: true, reloadOnChange: true);
+            var config = new ConfigurationBuilder()
+                .AddJsonFile("secrets.json", optional: true, reloadOnChange: true)
+                .Build();
 
-            var config = builder.Build();
-
-            // Setup policies
-            var serviceUnavailablePolicy = Policy
-                .Handle<SpotifyHttpResponseWithErrorCodeException>(x => x.IsRecoverable())
-                .Or<SpotifyHttpRequestException>(x => x.InnerException is HttpRequestException)
-                .WaitAndRetryAsync(3, i => TimeSpan.FromSeconds(5));
-
-            var tooManyRequestsPolicy = Policy.Handle<SpotifyHttpResponseWithErrorCodeException>(e => (int)e.ErrorCode == 429 && e.Headers.RetryAfter.GetValueOrDefault() > TimeSpan.Zero)
+            // Build retry policy
+            var retryPolicy = HttpPolicyExtensions
+                .HandleTransientHttpError()
+                .OrResult(x => x.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
                 .WaitAndRetryAsync(
                     retryCount: 3,
-                    sleepDurationProvider: (retryAttempt, retryContext) =>
+                    sleepDurationProvider: (retryCount, response, context) =>
                     {
-                        if (retryContext == null || !retryContext.TryGetValue("RetryAfter", out object retryAfter))
-                        {
-                            retryAfter = TimeSpan.FromSeconds(1);
-                        }
-
-                        return (TimeSpan)retryAfter;
+                        var retryAfter = (response?.Result?.Headers?.RetryAfter?.Delta).GetValueOrDefault();
+                        var min = TimeSpan.FromSeconds(1);
+                        return retryAfter > min ? retryAfter : min;
                     },
-                    onRetry: (exception, timespan, retryAttempt, retryContext) =>
-                    {
-                        retryContext["RetryAfter"] = (exception as SpotifyHttpResponseWithErrorCodeException).Headers.RetryAfter;
-                    });
-
-            var wrapPolicy = Policy.WrapAsync(serviceUnavailablePolicy, tooManyRequestsPolicy);
+                    onRetryAsync: (response, timespan, retryCount, context) => Task.CompletedTask);
 
             // Build services provider
             var services = new ServiceCollection();
 
-            services.Configure<ClientCredentialsFlowOptions>(config.GetSection("ClientCredentialsFlowOptions"));
+            services
+                .Configure<SpotifyClientCredentialsFlowOptions>(config.GetSection("SpotifyClientCredentialsFlow"));
 
             services
-                .AddFluentSpotifyClient(clientBuilder => clientBuilder
-                    .ConfigurePipeline(pipeline => pipeline
-                        .AddDelegate((next, cancellationToken) => wrapPolicy.ExecuteAsync(next, cancellationToken))
-                        .AddClientCredentialsFlow()));
+                .AddFluentSpotifyClient()
+                .ConfigureHttpClientBuilder(b => b.AddPolicyHandler(retryPolicy))
+                .ConfigureHttpClientBuilder(b => b
+                    .AddSpotifyClientCredentialsFlow()
+                    .ConfigureTokenHttpClientBuilder(b => b.AddPolicyHandler(retryPolicy)));
 
             serviceProvider = services.BuildServiceProvider();
 
@@ -72,10 +61,7 @@ namespace FluentSpotifyApi.IntegrationTests.CCF
         [AssemblyCleanup]
         public static void AssemblyCleanup()
         {
-            if (serviceProvider != null)
-            {
-                ((IDisposable)serviceProvider).Dispose();
-            }
+            ((IDisposable)serviceProvider)?.Dispose();
         }
     }
 }
